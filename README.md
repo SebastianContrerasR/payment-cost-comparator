@@ -8,6 +8,7 @@ el costo final, destacando el método más económico.
 
 - **Moneda origen:** JPY · **Moneda de referencia:** USD
 - SPA sin backend: todo corre en el navegador, los datos son configuración por código.
+- Tabla configurable: columnas ocultables desde el botón **Columnas** (preferencia persistida) y cabeceras agrupadas por color: identidad, conversión, comisiones, cashback y resultado.
 - Desplegada en **GitHub Pages**.
 
 ---
@@ -131,7 +132,7 @@ nueva, agrega su tipo de cambio en `App.tsx` (`DEFAULT_EXCHANGE_RATES`) y en
 ├── src/
 │   ├── components/
 │   │   ├── InputPanel/             Monto JPY + tipos de cambio editables
-│   │   ├── ComparisonTable/        Tabla comparativa y orden por columnas
+│   │   ├── ComparisonTable/        Tabla: columnas configurables, orden y cabeceras por grupo
 │   │   ├── PaymentMethodDetails/   Info del método: fees, cashback, requisitos...
 │   │   └── CalculationBreakdown/   Desglose paso a paso del total
 │   ├── data/

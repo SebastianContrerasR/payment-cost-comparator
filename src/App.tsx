@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CalculationBreakdown from "./components/CalculationBreakdown/CalculationBreakdown";
 import ComparisonTable, {
   type SortKey,
@@ -9,6 +9,7 @@ import PaymentMethodDetails from "./components/PaymentMethodDetails/PaymentMetho
 import paymentMethods from "./data/paymentMethods";
 import type { ExchangeRateInput } from "./domain/types";
 import { useComparison } from "./hooks/useComparison";
+import { useVisibleColumns } from "./hooks/useVisibleColumns";
 import { formatUsd } from "./utils/currency";
 
 const DEFAULT_AMOUNT_JPY = 50_000;
@@ -30,6 +31,15 @@ export default function App() {
     key: "totalUSD",
     direction: "asc",
   });
+  const { visibleColumns, toggleColumn: toggleVisibleColumn, reset: resetVisibleColumns } =
+    useVisibleColumns();
+
+  // Si se oculta la columna por la que se ordena, se vuelve a Total ascendente.
+  useEffect(() => {
+    if (sort.key !== "name" && !visibleColumns.includes(sort.key)) {
+      setSort({ key: "totalUSD", direction: "asc" });
+    }
+  }, [sort.key, visibleColumns]);
 
   const { results, cheapestId } = useComparison(
     paymentMethods,
@@ -120,6 +130,9 @@ export default function App() {
           onSelect={handleSelect}
           sort={sort}
           onSortChange={handleSortChange}
+          visibleColumns={visibleColumns}
+          onToggleColumn={toggleVisibleColumn}
+          onResetColumns={resetVisibleColumns}
         />
 
         {selectedResult ? (

@@ -2,13 +2,10 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import App from "../src/App";
 
-/**
- * Prueba de humo de la interfaz: renderizado en servidor de la app con los
- * valores por defecto (escenario del Excel). No abre navegador ni hace I/O.
- */
+/** Render inicial con los valores por defecto (escenario del Excel). */
 const html = renderToString(<App />);
 
-describe("App (rendizado inicial)", () => {
+describe("App (renderizado inicial)", () => {
   it("muestra el encabezado con las monedas de la comparación", () => {
     expect(html).toContain("Comparador de métodos de pago");
     expect(html).toContain("Moneda origen: JPY");
@@ -42,10 +39,31 @@ describe("App (rendizado inicial)", () => {
     expect(html).toContain("row-cheapest");
   });
 
+  it("muestra por defecto solo las columnas seleccionadas y el selector", () => {
+    expect(html).toContain("Columnas");
+    expect(html).toContain("Con comisiones");
+    expect(html).toContain("Efectivo");
+    expect(html).toContain(">Total<");
+    // Secundarias, ocultas por defecto. "Marca" solo existe en la tabla y en
+    // el detalle (no seleccionado al inicio).
+    expect(html).not.toContain("Marca");
+    expect(html).not.toContain("Ilimitado");
+    expect(html).not.toContain("Potencial");
+  });
+
+  it("colorea las cabeceras por grupo de columna", () => {
+    expect(html).toContain("th-group-identity"); // nombre (fija)
+    expect(html).toContain("th-group-fees"); // Con comisiones
+    expect(html).toContain("th-group-cashback"); // Efectivo
+    expect(html).toContain("th-group-result"); // Total
+    // TC y Base (USD) están ocultas por defecto.
+    expect(html).not.toContain("th-group-conversion");
+  });
+
   it("muestra los totales de la tabla y la pista de detalle", () => {
     expect(html).toContain("$317.0271");
-    expect(
-      html,
-    ).toContain(`Selecciona un método de la tabla para ver su información`);
+    expect(html).toContain(
+      "Selecciona un método de la tabla para ver su información",
+    );
   });
 });

@@ -591,6 +591,175 @@ code {
 }
 
 /* ------------------------------------------------------------------ *
+ * Toolbar de la tabla y selector de columnas
+ * ------------------------------------------------------------------ */
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px 10px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.table-units {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.column-picker {
+  position: relative;
+}
+
+.column-picker-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.column-picker-button:hover,
+.column-picker-button[aria-expanded="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.column-picker-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 6;
+  width: 250px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  box-shadow: 0 14px 34px rgb(22 35 61 / 0.18);
+}
+
+.column-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.column-picker-item:hover {
+  background: var(--accent-soft);
+}
+
+.column-picker-item input {
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.column-picker-item--locked {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.column-picker-lock {
+  margin-left: auto;
+  font-size: 11px;
+}
+
+.column-picker-reset {
+  margin-top: 6px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  background: #f5f8fc;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.column-picker-reset:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ *
+ * Cabeceras por grupo de columnas
+ * ------------------------------------------------------------------ */
+
+.comparison-table .th-group-conversion .sort-indicator.is-active,
+.comparison-table .th-group-fees .sort-indicator.is-active,
+.comparison-table .th-group-cashback .sort-indicator.is-active,
+.comparison-table .th-group-result .sort-indicator.is-active {
+  color: currentColor;
+}
+
+.comparison-table thead th.th-group-conversion {
+  background: #e4efff;
+  box-shadow: inset 0 3px 0 #2456e6;
+}
+
+.comparison-table thead th.th-group-conversion .th-sort {
+  color: #1d4ed8;
+}
+
+.comparison-table thead th.th-group-fees {
+  background: #fdf3df;
+  box-shadow: inset 0 3px 0 #b45309;
+}
+
+.comparison-table thead th.th-group-fees .th-sort {
+  color: #92400e;
+}
+
+.comparison-table thead th.th-group-cashback {
+  background: #e2f4ea;
+  box-shadow: inset 0 3px 0 #0d7a4d;
+}
+
+.comparison-table thead th.th-group-cashback .th-sort {
+  color: #065f46;
+}
+
+.comparison-table thead th.th-group-result {
+  background: #1d4ed8;
+  box-shadow: inset 0 3px 0 #163075;
+}
+
+.comparison-table thead th.th-group-result .th-sort {
+  color: #ffffff;
+}
+
+.comparison-table thead th.th-group-result .th-sort:hover {
+  color: #dbe5ff;
+}
+
+/* ------------------------------------------------------------------ *
  * Utilidades y responsive
  * ------------------------------------------------------------------ */
 

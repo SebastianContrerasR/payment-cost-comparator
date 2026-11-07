@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { CalculationResult, OkCalculationResult } from "../../domain/types";
 import { formatPercent, formatRate, formatUsd } from "../../utils/currency";
+import { ColumnPicker, type ColumnPickerTarget } from "./ColumnPicker";
 
 export type SortDirection = "asc" | "desc";
 
@@ -25,40 +26,94 @@ export interface SortState {
   direction: SortDirection;
 }
 
+type ColumnGroup = "identity" | "conversion" | "fees" | "cashback" | "result";
+
 interface ColumnDef {
   key: SortKey;
   label: string;
   align: "left" | "right";
+  group: ColumnGroup;
+  /** Tooltip de la cabecera para las abreviaturas. */
+  description?: string;
 }
 
 const COLUMNS: ColumnDef[] = [
-  { key: "name", label: "Forma de pago", align: "left" },
-  { key: "network", label: "Marca", align: "left" },
-  { key: "exchangeRate", label: "Tipo de cambio", align: "right" },
-  { key: "baseAmountUSD", label: "Monto base", align: "right" },
-  { key: "fxFee", label: "FX fee", align: "right" },
-  { key: "afterFxUSD", label: "Monto con FX", align: "right" },
-  { key: "cryptoFee", label: "Crypto fee", align: "right" },
-  { key: "otherFees", label: "Otras comisiones", align: "left" },
+  { key: "name", label: "Método", align: "left", group: "identity" },
+  { key: "network", label: "Marca", align: "left", group: "identity" },
+  {
+    key: "exchangeRate",
+    label: "TC",
+    align: "right",
+    group: "conversion",
+    description: "Tipo de cambio: JPY por USD",
+  },
+  {
+    key: "baseAmountUSD",
+    label: "Base (USD)",
+    align: "right",
+    group: "conversion",
+  },
+  {
+    key: "fxFee",
+    label: "FX",
+    align: "right",
+    group: "fees",
+    description: "FX fee: comisión por cambio de divisa",
+  },
+  { key: "afterFxUSD", label: "Con FX", align: "right", group: "fees" },
+  {
+    key: "cryptoFee",
+    label: "Crypto",
+    align: "right",
+    group: "fees",
+    description: "Crypto fee: comisión de conversión de criptomonedas a fiat",
+  },
+  {
+    key: "otherFees",
+    label: "Otras comisiones",
+    align: "left",
+    group: "fees",
+  },
   {
     key: "totalBeforeCashbackUSD",
-    label: "Monto con comisiones",
+    label: "Con comisiones",
     align: "right",
+    group: "fees",
   },
-  { key: "cashbackRate", label: "Cashback", align: "right" },
-  { key: "cashbackCapUSD", label: "Límite cashback", align: "right" },
+  {
+    key: "cashbackRate",
+    label: "Cashback %",
+    align: "right",
+    group: "cashback",
+  },
+  { key: "cashbackCapUSD", label: "Límite", align: "right", group: "cashback" },
   {
     key: "potentialCashbackUSD",
-    label: "Cashback potencial",
+    label: "Potencial",
     align: "right",
+    group: "cashback",
   },
   {
     key: "effectiveCashbackUSD",
-    label: "Cashback efectivo",
+    label: "Efectivo",
     align: "right",
+    group: "cashback",
   },
-  { key: "totalUSD", label: "Total", align: "right" },
+  { key: "totalUSD", label: "Total", align: "right", group: "result" },
 ];
+
+/** Columnas mostradas por defecto; "Método" está siempre visible. */
+export const DEFAULT_VISIBLE_COLUMNS: SortKey[] = [
+  "name",
+  "totalBeforeCashbackUSD",
+  "effectiveCashbackUSD",
+  "totalUSD",
+];
+
+/** Todas las claves de columna, para validar la preferencia guardada. */
+export const ALL_COLUMN_KEYS: readonly SortKey[] = COLUMNS.map(
+  (column) => column.key,
+);
 
 interface ComparisonTableProps {
   results: CalculationResult[];
@@ -67,6 +122,9 @@ interface ComparisonTableProps {
   onSelect: (id: string) => void;
   sort: SortState;
   onSortChange: (key: SortKey) => void;
+  visibleColumns: readonly SortKey[];
+  onToggleColumn: (key: SortKey) => void;
+  onResetColumns: () => void;
 }
 
 function otherFeesTotalUSD(row: OkCalculationResult): number {
@@ -129,13 +187,15 @@ export function sortResults(
   });
 }
 
-function formatFeeRule(rule: OkCalculationResult["breakdown"]["otherFeeLines"][number]["rule"]): string {
+function formatFeeRule(
+  rule: OkCalculationResult["breakdown"]["otherFeeLines"][number]["rule"],
+): string {
   return rule.type === "percentage"
     ? `${formatPercent(rule.value)}`
     : `${formatUsd(rule.value, 2)} fija`;
 }
 
-/** C. Tabla comparativa: una fila por método, con orden por costo final. */
+/** C. Tabla comparativa: columnas configurables y orden por costo final. */
 export function ComparisonTable({
   results,
   cheapestId,
@@ -143,10 +203,23 @@ export function ComparisonTable({
   onSelect,
   sort,
   onSortChange,
+  visibleColumns,
+  onToggleColumn,
+  onResetColumns,
 }: ComparisonTableProps) {
-  const sortedRows = useMemo(
-    () => sortResults(results, sort),
-    [results, sort],
+  const sortedRows = useMemo(() => sortResults(results, sort), [results, sort]);
+
+  const columns = useMemo(
+    () =>
+      COLUMNS.filter(
+        (column) => column.key === "name" || visibleColumns.includes(column.key),
+      ),
+    [visibleColumns],
+  );
+
+  const pickerColumns: ColumnPickerTarget[] = useMemo(
+    () => COLUMNS.filter((column) => column.key !== "name"),
+    [],
   );
 
   const renderCell = (column: ColumnDef, row: OkCalculationResult) => {
@@ -214,21 +287,37 @@ export function ComparisonTable({
 
   return (
     <section className="card table-card" aria-label="Tabla comparativa">
+      <div className="table-toolbar">
+        <p className="table-units">
+          Importes en USD · tipo de cambio en JPY/USD
+        </p>
+        <ColumnPicker
+          columns={pickerColumns}
+          visible={visibleColumns}
+          onToggle={onToggleColumn}
+          onReset={onResetColumns}
+        />
+      </div>
       <div className="table-scroll">
         <table className="comparison-table">
           <caption className="visually-hidden">
             Métodos de pago con su desglose de comisiones, cashback y costo total
-            en USD
+            USD
           </caption>
           <thead>
             <tr>
-              {COLUMNS.map((column) => (
+              {columns.map((column) => (
                 <th
                   key={column.key}
                   scope="col"
-                  className={`col-${column.align}${
-                    column.key === "totalUSD" ? " col-total" : ""
-                  }${column.key === "name" ? " col-first" : ""}`}
+                  className={[
+                    `col-${column.align}`,
+                    column.key === "name" ? "col-first" : "",
+                    column.key === "totalUSD" ? "col-total" : "",
+                    `th-group-${column.group}`,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   aria-sort={
                     sort.key === column.key
                       ? sort.direction === "asc"
@@ -240,6 +329,7 @@ export function ComparisonTable({
                   <button
                     type="button"
                     className="th-sort"
+                    title={column.description}
                     onClick={() => onSortChange(column.key)}
                   >
                     <span>{column.label}</span>
@@ -276,7 +366,7 @@ export function ComparisonTable({
                   aria-selected={selectedId === row.method.id}
                   onClick={() => onSelect(row.method.id)}
                 >
-                  {COLUMNS.map((column) => (
+                  {columns.map((column) => (
                     <td
                       key={column.key}
                       className={`col-${column.align}${
@@ -289,7 +379,7 @@ export function ComparisonTable({
                 </tr>
               ) : (
                 <tr key={row.method.id} className="row-error">
-                  <td colSpan={COLUMNS.length} className="cell-error">
+                  <td colSpan={columns.length} className="cell-error">
                     {row.method.name}: no se puede calcular — {row.reason}
                   </td>
                 </tr>

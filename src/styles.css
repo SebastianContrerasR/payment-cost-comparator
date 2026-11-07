@@ -277,7 +277,10 @@ code {
 .comparison-table {
   width: 100%;
   min-width: 1180px;
-  border-collapse: collapse;
+  /* Separado (no "collapse"): las celdas congeladas conservan sus propias
+     líneas al desplazarse. */
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 13.5px;
 }
 
@@ -334,6 +337,25 @@ code {
   vertical-align: top;
 }
 
+/* Primera columna congelada: el nombre del método sigue visible al
+   desplazarse horizontalmente. El separador se dibuja con box-shadow para
+   que no se desplace con el scroll. */
+.comparison-table thead th.col-first,
+.comparison-table tbody td.col-first {
+  position: sticky;
+  left: 0;
+  box-shadow: inset -1px 0 0 var(--border-strong);
+}
+
+.comparison-table thead th.col-first {
+  z-index: 3;
+}
+
+.comparison-table tbody td.col-first {
+  z-index: 2;
+  background: var(--surface);
+}
+
 .comparison-table tbody tr:last-child td {
   border-bottom: 0;
 }
@@ -352,6 +374,23 @@ code {
 
 .comparison-table tbody tr.row-cheapest:hover {
   background: #dff2e8;
+}
+
+/* La celda congelada necesita fondo opaco propio en cada estado de fila. */
+.comparison-table tbody tr:not(.row-error):hover td.col-first {
+  background: #f6f9fe;
+}
+
+.comparison-table tbody tr.row-cheapest td.col-first {
+  background: var(--success-soft);
+}
+
+.comparison-table tbody tr.row-cheapest:hover td.col-first {
+  background: #dff2e8;
+}
+
+.comparison-table tbody tr.row-selected td.col-first {
+  box-shadow: inset -1px 0 0 var(--border-strong), inset 3px 0 0 var(--accent);
 }
 
 .comparison-table tbody tr.row-selected {

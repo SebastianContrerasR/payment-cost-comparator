@@ -228,7 +228,7 @@ export function ComparisonTable({
                   scope="col"
                   className={`col-${column.align}${
                     column.key === "totalUSD" ? " col-total" : ""
-                  }`}
+                  }${column.key === "name" ? " col-first" : ""}`}
                   aria-sort={
                     sort.key === column.key
                       ? sort.direction === "asc"
@@ -281,7 +281,7 @@ export function ComparisonTable({
                       key={column.key}
                       className={`col-${column.align}${
                         column.key === "totalUSD" ? " col-total" : ""
-                      }`}
+                      }${column.key === "name" ? " col-first" : ""}`}
                     >
                       {renderCell(column, row)}
                     </td>

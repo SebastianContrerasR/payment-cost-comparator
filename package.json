@@ -1,0 +1,29 @@
+{
+  "name": "payment-cost-comparator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Compara el costo efectivo de tarjetas y métodos de pago al comprar en Japón: tipo de cambio, comisiones FX/crypto, otras comisiones y cashback.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "typecheck": "tsc",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}

@@ -1,0 +1,13 @@
+# Build output (deployed by GitHub Actions, never committed)
+dist/
+
+# Dependencies
+node_modules/
+
+# Local env / tooling
+*.local
+.DS_Store
+
+# Logs
+logs/
+npm-debug.log*

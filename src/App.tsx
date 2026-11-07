@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CalculationBreakdown from "./components/CalculationBreakdown/CalculationBreakdown";
 import ComparisonTable, {
   type SortKey,
   type SortState,
 } from "./components/ComparisonTable/ComparisonTable";
 import InputPanel from "./components/InputPanel/InputPanel";
-import PaymentMethodDetails from "./components/PaymentMethodDetails/PaymentMethodDetails";
+import MethodDetailModal from "./components/MethodDetailModal/MethodDetailModal";
 import paymentMethods from "./data/paymentMethods";
 import type { ExchangeRateInput } from "./domain/types";
 import { useComparison } from "./hooks/useComparison";
@@ -70,7 +69,12 @@ export default function App() {
   );
 
   const handleSelect = useCallback((id: string) => {
-    setSelectedId((previous) => (previous === id ? null : id));
+    // Cualquier clic en un método (fila o nombre) abre su modal de detalle.
+    setSelectedId(id);
+  }, []);
+
+  const closeDetails = useCallback(() => {
+    setSelectedId(null);
   }, []);
 
   const handleSortChange = useCallback((key: SortKey) => {
@@ -141,23 +145,11 @@ export default function App() {
         />
 
         {selectedResult ? (
-          selectedResult.status === "ok" ? (
-            <section className="details-grid" aria-label="Detalle del método">
-              <PaymentMethodDetails method={selectedResult.method} />
-              <CalculationBreakdown result={selectedResult} />
-            </section>
-          ) : (
-            <section className="card" aria-label="Detalle no disponible">
-              <div className="card-head">
-                <h2 className="card-title">{selectedResult.method.name}</h2>
-                <p className="card-subtitle">{selectedResult.reason}</p>
-              </div>
-            </section>
-          )
+          <MethodDetailModal result={selectedResult} onClose={closeDetails} />
         ) : (
           <p className="details-hint">
-            Selecciona un método de la tabla para ver su información, requisitos
-            y el desglose del cálculo.
+            Selecciona un método de la tabla para abrir un panel con su
+            información, requisitos y el desglose del cálculo.
           </p>
         )}
       </main>

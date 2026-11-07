@@ -5,15 +5,30 @@ interface CalculationBreakdownProps {
   result: OkCalculationResult;
 }
 
+/**
+ * Grupo de color del desglose, igual que las cabeceras de la tabla:
+ * conversión (azul), comisiones (ámbar), cashback (verde) y total (sólido).
+ */
+type BreakdownGroup = "conversion" | "fees" | "cashback" | "result";
+
 interface BreakdownRowProps {
   label: string;
   value: string;
+  group?: BreakdownGroup;
   variant?: "default" | "divider" | "total";
 }
 
-function BreakdownRow({ label, value, variant = "default" }: BreakdownRowProps) {
+function BreakdownRow({
+  label,
+  value,
+  group,
+  variant = "default",
+}: BreakdownRowProps) {
+  const groupClass = group ? ` breakdown-row--${group}` : "";
   return (
-    <div className={`breakdown-row breakdown-row--${variant}`}>
+    <div
+      className={`breakdown-row breakdown-row--${variant}${groupClass}`}
+    >
       <span className="breakdown-label">{label}</span>
       <span className="breakdown-leader" aria-hidden="true" />
       <span className="breakdown-value">{value}</span>
@@ -23,7 +38,8 @@ function BreakdownRow({ label, value, variant = "default" }: BreakdownRowProps) 
 
 /**
  * E. Desglose del cálculo: muestra paso a paso cómo se obtuvo el total del
- * método seleccionado (conversión, comisiones, cashback y total final).
+ * método seleccionado. Cada fila adopta el color del grupo de columna de la
+ * tabla al que pertenece (conversión, comisiones, cashback o total).
  */
 export function CalculationBreakdown({
   result,
@@ -31,76 +47,77 @@ export function CalculationBreakdown({
   const { breakdown, method } = result;
 
   return (
-    <article className="card breakdown-card">
-      <div className="card-head">
-        <h2 className="card-title">Desglose del cálculo</h2>
-        <p className="card-subtitle">
-          {method.name} · {method.network}
-        </p>
-      </div>
-
-      <div className="breakdown">
-        <BreakdownRow label="Monto original" value={formatJpy(breakdown.amountJPY)} />
+    <div className="breakdown">
+      <BreakdownRow label="Monto original" value={formatJpy(breakdown.amountJPY)} />
+      <BreakdownRow
+        label={`Tipo de cambio (${method.exchangeRateKey})`}
+        value={`${formatRate(breakdown.exchangeRate)} JPY/USD`}
+        group="conversion"
+      />
+      <BreakdownRow
+        label="Conversión a USD"
+        value={formatUsd(breakdown.baseAmountUSD)}
+        group="conversion"
+        variant="divider"
+      />
+      <BreakdownRow
+        label={`FX Fee (${formatPercent(method.fees.fxFee)})`}
+        value={`+${formatUsd(breakdown.fxFeeCostUSD)}`}
+        group="fees"
+      />
+      <BreakdownRow
+        label={`Crypto Fee (${formatPercent(method.fees.cryptoFee)})`}
+        value={`+${formatUsd(breakdown.cryptoFeeCostUSD)}`}
+        group="fees"
+      />
+      {breakdown.otherFeeLines.map((line) => (
         <BreakdownRow
-          label={`Tipo de cambio (${method.exchangeRateKey})`}
-          value={`${formatRate(breakdown.exchangeRate)} JPY/USD`}
+          key={line.rule.id}
+          label={`${line.rule.name} (${
+            line.rule.type === "percentage"
+              ? formatPercent(line.rule.value)
+              : `${formatUsd(line.rule.value, 2)} fija`
+          })`}
+          value={`+${formatUsd(line.costUSD)}`}
+          group="fees"
         />
-        <BreakdownRow
-          label="Conversión a USD"
-          value={formatUsd(breakdown.baseAmountUSD)}
-          variant="divider"
-        />
-        <BreakdownRow
-          label={`FX Fee (${formatPercent(method.fees.fxFee)})`}
-          value={`+${formatUsd(breakdown.fxFeeCostUSD)}`}
-        />
-        <BreakdownRow
-          label={`Crypto Fee (${formatPercent(method.fees.cryptoFee)})`}
-          value={`+${formatUsd(breakdown.cryptoFeeCostUSD)}`}
-        />
-        {breakdown.otherFeeLines.map((line) => (
+      ))}
+      <BreakdownRow
+        label="Costo antes de cashback"
+        value={formatUsd(breakdown.totalBeforeCashbackUSD)}
+        group="fees"
+        variant="divider"
+      />
+      {method.cashback.rate > 0 ? (
+        <>
           <BreakdownRow
-            key={line.rule.id}
-            label={`${line.rule.name} (${
-              line.rule.type === "percentage"
-                ? formatPercent(line.rule.value)
-                : `${formatUsd(line.rule.value, 2)} fija`
-            })`}
-            value={`+${formatUsd(line.costUSD)}`}
+            label={`Cashback potencial (${formatPercent(method.cashback.rate)})`}
+            value={formatUsd(breakdown.potentialCashbackUSD)}
+            group="cashback"
           />
-        ))}
-        <BreakdownRow
-          label="Costo antes de cashback"
-          value={formatUsd(breakdown.totalBeforeCashbackUSD)}
-          variant="divider"
-        />
-        {method.cashback.rate > 0 ? (
-          <>
-            <BreakdownRow
-              label={`Cashback potencial (${formatPercent(method.cashback.rate)})`}
-              value={formatUsd(breakdown.potentialCashbackUSD)}
-            />
-            <BreakdownRow
-              label="Límite disponible"
-              value={
-                breakdown.cashbackCapUSD === null
-                  ? "Ilimitado"
-                  : formatUsd(breakdown.cashbackCapUSD)
-              }
-            />
-            <BreakdownRow
-              label="Cashback efectivo"
-              value={`−${formatUsd(breakdown.effectiveCashbackUSD)}`}
-            />
-          </>
-        ) : null}
-        <BreakdownRow
-          label="Total"
-          value={formatUsd(breakdown.totalUSD)}
-          variant="total"
-        />
-      </div>
-    </article>
+          <BreakdownRow
+            label="Límite disponible"
+            value={
+              breakdown.cashbackCapUSD === null
+                ? "Ilimitado"
+                : formatUsd(breakdown.cashbackCapUSD)
+            }
+            group="cashback"
+          />
+          <BreakdownRow
+            label="Cashback efectivo"
+            value={`−${formatUsd(breakdown.effectiveCashbackUSD)}`}
+            group="cashback"
+          />
+        </>
+      ) : null}
+      <BreakdownRow
+        label="Total"
+        value={formatUsd(breakdown.totalUSD)}
+        group="result"
+        variant="total"
+      />
+    </div>
   );
 }
 

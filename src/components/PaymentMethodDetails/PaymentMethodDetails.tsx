@@ -40,18 +40,12 @@ function FeeListItems({ method }: { method: PaymentMethod }) {
   );
 }
 
-/** D. Panel de detalle con la información complementaria del método. */
+/** D. Información complementaria del método, para el modal de detalle. */
 export function PaymentMethodDetails({ method }: PaymentMethodDetailsProps) {
   return (
-    <article className="card details-card">
-      <div className="card-head">
-        <h2 className="card-title">{method.name}</h2>
-        <p className="card-subtitle">
-          {method.provider} · {method.network}
-          {method.enabled ? "" : " · Deshabilitado"}
-        </p>
+    <article className="method-info">
+      {method.cashback.currency || !method.enabled ? (
         <div className="chip-row">
-          <span className="chip">Marca: {method.network}</span>
           {method.cashback.currency ? (
             <span className="chip chip-cashback">
               Cashback en {method.cashback.currency}
@@ -59,7 +53,7 @@ export function PaymentMethodDetails({ method }: PaymentMethodDetailsProps) {
           ) : null}
           {!method.enabled ? <span className="chip">Inactivo</span> : null}
         </div>
-      </div>
+      ) : null}
 
       <div className="details-body">
         <section className="details-section">

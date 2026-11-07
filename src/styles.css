@@ -465,11 +465,140 @@ code {
  * Detalle y desglose
  * ------------------------------------------------------------------ */
 
-.details-grid {
+/* ------------------------------------------------------------------ *
+ * Modal de detalle del método
+ * ------------------------------------------------------------------ */
+
+.method-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 26px 16px;
+  background: rgb(15 26 46 / 0.46);
+}
+
+.method-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(840px, 100%);
+  max-height: calc(100vh - 52px);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 68px rgb(15 26 46 / 0.32);
+  overflow: hidden;
+  animation: modal-in 160ms ease;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .method-modal {
+    animation: none;
+  }
+}
+
+.method-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-shrink: 0;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.method-modal-head h2 {
+  font-size: 19px;
+  letter-spacing: -0.2px;
+}
+
+.method-modal-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.method-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.method-modal-close:hover,
+.method-modal-close:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: none;
+}
+
+.method-modal-body {
+  overflow-y: auto;
+  padding: 16px 18px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.method-modal-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
+}
+
+.method-modal-panel {
+  min-width: 0;
+  padding: 12px 14px;
+  background: #fbfdff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+}
+
+.method-modal-panel-title {
+  margin-bottom: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.method-modal-status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-small);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 13.5px;
+}
+
+.method-info .chip-row {
+  margin-bottom: 12px;
 }
 
 .details-body {
@@ -542,13 +671,16 @@ code {
   background: #f8fafd;
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
-  padding: 12px 14px;
+  padding: 9px 10px;
 }
 
 .breakdown-row {
   display: flex;
   align-items: baseline;
   gap: 8px;
+  /* Espacio para el tinte de grupo: fila con esquinas y acento lateral. */
+  padding: 2px 9px;
+  border-radius: 6px;
 }
 
 .breakdown-row--divider {
@@ -585,6 +717,55 @@ code {
 .breakdown-row--total .breakdown-value,
 .breakdown-row--total .breakdown-label {
   color: var(--text);
+}
+
+/* Colores por grupo, los mismos de las cabeceras de la tabla. */
+.breakdown-row--conversion {
+  background: #e4efff;
+  box-shadow: inset 3px 0 0 #2456e6;
+}
+
+.breakdown-row--conversion .breakdown-value {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.breakdown-row--fees {
+  background: #fdf3df;
+  box-shadow: inset 3px 0 0 #b45309;
+}
+
+.breakdown-row--fees .breakdown-value {
+  color: #92400e;
+  font-weight: 700;
+}
+
+.breakdown-row--cashback {
+  background: #e2f4ea;
+  box-shadow: inset 3px 0 0 #0d7a4d;
+}
+
+.breakdown-row--cashback .breakdown-value {
+  color: #065f46;
+  font-weight: 700;
+}
+
+/* Total final: azul sólido con texto blanco, como la cabecera "Total". */
+.breakdown-row--result {
+  background: #1d4ed8;
+  box-shadow: inset 3px 0 0 #163075;
+}
+
+.breakdown-row--result .breakdown-label {
+  color: rgb(255 255 255 / 0.82);
+}
+
+.breakdown-row--result .breakdown-value {
+  color: #ffffff;
+}
+
+.breakdown-row--result .breakdown-leader {
+  border-bottom-color: rgb(255 255 255 / 0.4);
 }
 
 .details-hint {
@@ -842,7 +1023,7 @@ code {
 }
 
 @media (max-width: 880px) {
-  .details-grid {
+  .method-modal-grid {
     grid-template-columns: 1fr;
   }
 
@@ -855,9 +1036,10 @@ code {
   }
 }
 
-/* Móvil angosto: la tabla se compacta y el selector de columnas se abre
+/* Móvil angosto: la tabla se compacta, el selector de columnas se abre
    como hoja inferior fija (position: fixed escapa del clipping de la
-   tarjeta, y el desplazamiento interno funciona en pantallas chicas). */
+   tarjeta, y el desplazamiento interno funciona en pantallas chicas) y el
+   modal de detalle pasa a hoja inferior de casi toda la pantalla. */
 @media (max-width: 640px) {
   .comparison-table {
     font-size: 13px;
@@ -909,5 +1091,30 @@ code {
     bottom: -8px;
     background: var(--surface);
     padding-bottom: 2px;
+  }
+
+  /* Modal de detalle: hoja inferior de casi toda la pantalla, con el
+     encabezado fijo arriba y el contenido desplazándose dentro. */
+  .method-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .method-modal {
+    width: 100%;
+    max-height: calc(92vh - env(safe-area-inset-bottom, 0px));
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .method-modal-head {
+    padding: 11px 14px;
+  }
+
+  .method-modal-body {
+    padding: 13px 14px calc(15px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .method-modal-panel {
+    padding: 11px 12px;
   }
 }

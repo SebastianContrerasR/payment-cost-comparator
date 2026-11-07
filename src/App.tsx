@@ -31,8 +31,12 @@ export default function App() {
     key: "totalUSD",
     direction: "asc",
   });
-  const { visibleColumns, toggleColumn: toggleVisibleColumn, reset: resetVisibleColumns } =
-    useVisibleColumns();
+  const {
+    visibleColumns,
+    toggleColumn: toggleVisibleColumn,
+    selectAll: showAllColumns,
+    reset: resetVisibleColumns,
+  } = useVisibleColumns();
 
   // Si se oculta la columna por la que se ordena, se vuelve a Total ascendente.
   useEffect(() => {
@@ -132,6 +136,7 @@ export default function App() {
           onSortChange={handleSortChange}
           visibleColumns={visibleColumns}
           onToggleColumn={toggleVisibleColumn}
+          onSelectAllColumns={showAllColumns}
           onResetColumns={resetVisibleColumns}
         />
 

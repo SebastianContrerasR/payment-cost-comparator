@@ -50,11 +50,12 @@ function readStoredVisibleColumns(): SortKey[] {
 
 /**
  * Estado de columnas visibles de la tabla, persistido en localStorage.
- * Devuelve { visibles, alternar columna, restablecer }.
+ * Devuelve { visibles, alternar columna, seleccionar todas, restablecer }.
  */
 export function useVisibleColumns(): {
   visibleColumns: SortKey[];
   toggleColumn: (key: SortKey) => void;
+  selectAll: () => void;
   reset: () => void;
 } {
   const [visibleColumns, setVisibleColumns] = useState<SortKey[]>(
@@ -87,5 +88,9 @@ export function useVisibleColumns(): {
     setVisibleColumns(DEFAULT_VISIBLE_COLUMNS);
   }, []);
 
-  return { visibleColumns, toggleColumn, reset };
+  const selectAll = useCallback(() => {
+    setVisibleColumns([...ALL_COLUMN_KEYS]);
+  }, []);
+
+  return { visibleColumns, toggleColumn, selectAll, reset };
 }

@@ -267,18 +267,21 @@ code {
 
 .table-card {
   padding: 0;
-  overflow: hidden;
 }
 
 .table-scroll {
   overflow-x: auto;
+  /* El clipping se traslada aquí desde la tarjeta (que ya no usa
+     overflow: hidden) para no cortar el panel del selector de columnas; el
+     radio inferior mantiene las esquinas redondeadas de la tarjeta. */
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .comparison-table {
   width: 100%;
-  min-width: 1180px;
   /* Separado (no "collapse"): las celdas congeladas conservan sus propias
-     líneas al desplazarse. */
+     líneas al desplazarse. Sin ancho mínimo forzado: en móvil la tabla solo
+     se desplaza tanto como lo piden las columnas visibles. */
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13.5px;
@@ -656,6 +659,8 @@ code {
   padding: 0;
   display: flex;
   flex-direction: column;
+  max-height: min(46vh, 420px);
+  overflow-y: auto;
 }
 
 .column-picker-item {
@@ -689,9 +694,14 @@ code {
   font-size: 11px;
 }
 
-.column-picker-reset {
-  margin-top: 6px;
-  width: 100%;
+.column-picker-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.column-picker-action {
+  flex: 1;
   padding: 7px 10px;
   border: 1px solid var(--border-strong);
   border-radius: 7px;
@@ -703,7 +713,7 @@ code {
   cursor: pointer;
 }
 
-.column-picker-reset:hover {
+.column-picker-action:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -760,6 +770,62 @@ code {
 }
 
 /* ------------------------------------------------------------------ *
+ * Leyenda de grupos de color
+ * ------------------------------------------------------------------ */
+
+.table-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 8px 20px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid rgb(22 35 61 / 0.25);
+}
+
+.legend-dot--identity {
+  background: #f7fafd;
+}
+
+.legend-dot--conversion {
+  background: #e4efff;
+  border-color: #2456e6;
+}
+
+.legend-dot--fees {
+  background: #fdf3df;
+  border-color: #b45309;
+}
+
+.legend-dot--cashback {
+  background: #e2f4ea;
+  border-color: #0d7a4d;
+}
+
+.legend-dot--result {
+  background: #1d4ed8;
+  border-color: #163075;
+}
+
+/* ------------------------------------------------------------------ *
  * Utilidades y responsive
  * ------------------------------------------------------------------ */
 
@@ -786,5 +852,57 @@ code {
 
   .card {
     padding: 15px 16px;
+  }
+}
+
+/* Móvil angosto: la tabla se compacta y el selector de columnas se abre
+   como hoja inferior fija (position: fixed escapa del clipping de la
+   tarjeta, y el desplazamiento interno funciona en pantallas chicas). */
+@media (max-width: 640px) {
+  .comparison-table {
+    font-size: 13px;
+  }
+
+  .comparison-table tbody td {
+    padding: 9px 10px;
+  }
+
+  .th-sort {
+    padding: 9px 10px;
+    font-size: 10.5px;
+  }
+
+  .table-toolbar {
+    padding: 10px 12px 10px 14px;
+  }
+
+  .table-legend {
+    padding: 8px 14px 10px;
+    gap: 5px 12px;
+  }
+
+  .column-picker-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .column-picker-panel {
+    position: fixed;
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 30;
+    width: auto;
+    max-height: 74vh;
+    overflow-y: auto;
+    box-shadow: 0 -10px 40px rgb(22 35 61 / 0.28);
+  }
+
+  .column-picker-actions {
+    position: sticky;
+    bottom: -8px;
+    background: var(--surface);
+    padding-bottom: 2px;
   }
 }

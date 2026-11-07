@@ -11,6 +11,7 @@ interface ColumnPickerProps {
   columns: readonly ColumnPickerTarget[];
   visible: readonly SortKey[];
   onToggle: (key: SortKey) => void;
+  onSelectAll: () => void;
   onReset: () => void;
 }
 
@@ -19,6 +20,7 @@ export function ColumnPicker({
   columns,
   visible,
   onToggle,
+  onSelectAll,
   onReset,
 }: ColumnPickerProps) {
   const [open, setOpen] = useState(false);
@@ -85,13 +87,22 @@ export function ColumnPicker({
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            className="column-picker-reset"
-            onClick={() => onReset()}
-          >
-            Restablecer
-          </button>
+          <div className="column-picker-actions">
+            <button
+              type="button"
+              className="column-picker-action"
+              onClick={() => onSelectAll()}
+            >
+              Seleccionar todo
+            </button>
+            <button
+              type="button"
+              className="column-picker-action"
+              onClick={() => onReset()}
+            >
+              Restablecer
+            </button>
+          </div>
         </div>
       ) : null}
     </div>

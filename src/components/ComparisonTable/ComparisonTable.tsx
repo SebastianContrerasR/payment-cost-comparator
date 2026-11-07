@@ -28,6 +28,15 @@ export interface SortState {
 
 type ColumnGroup = "identity" | "conversion" | "fees" | "cashback" | "result";
 
+/** Cabeceras de la tabla y su grupo de color (para la leyenda). */
+const COLUMN_GROUPS: readonly { id: ColumnGroup; label: string }[] = [
+  { id: "identity", label: "Identidad" },
+  { id: "conversion", label: "Conversión" },
+  { id: "fees", label: "Comisiones" },
+  { id: "cashback", label: "Cashback" },
+  { id: "result", label: "Resultado" },
+];
+
 interface ColumnDef {
   key: SortKey;
   label: string;
@@ -124,6 +133,7 @@ interface ComparisonTableProps {
   onSortChange: (key: SortKey) => void;
   visibleColumns: readonly SortKey[];
   onToggleColumn: (key: SortKey) => void;
+  onSelectAllColumns: () => void;
   onResetColumns: () => void;
 }
 
@@ -205,6 +215,7 @@ export function ComparisonTable({
   onSortChange,
   visibleColumns,
   onToggleColumn,
+  onSelectAllColumns,
   onResetColumns,
 }: ComparisonTableProps) {
   const sortedRows = useMemo(() => sortResults(results, sort), [results, sort]);
@@ -295,6 +306,7 @@ export function ComparisonTable({
           columns={pickerColumns}
           visible={visibleColumns}
           onToggle={onToggleColumn}
+          onSelectAll={onSelectAllColumns}
           onReset={onResetColumns}
         />
       </div>
@@ -387,6 +399,17 @@ export function ComparisonTable({
             )}
           </tbody>
         </table>
+      </div>
+      <div className="table-legend" aria-label="Leyenda de grupos de columnas">
+        {COLUMN_GROUPS.map((group) => (
+          <span key={group.id} className="legend-chip">
+            <span
+              className={`legend-dot legend-dot--${group.id}`}
+              aria-hidden="true"
+            />
+            <span>{group.label}</span>
+          </span>
+        ))}
       </div>
     </section>
   );

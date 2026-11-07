@@ -60,6 +60,13 @@ describe("App (renderizado inicial)", () => {
     expect(html).not.toContain("th-group-conversion");
   });
 
+  it("muestra la leyenda de grupos de color", () => {
+    expect(html).toContain("table-legend");
+    // La leyenda existe aunque sus columnas estén ocultas (avisa del sistema).
+    expect(html).toContain("Comisiones");
+    expect(html).toContain("Resultado");
+  });
+
   it("muestra los totales de la tabla y la pista de detalle", () => {
     expect(html).toContain("$317.0271");
     expect(html).toContain(

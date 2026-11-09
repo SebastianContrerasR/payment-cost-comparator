@@ -1,7 +1,7 @@
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import App from "../src/App";
-import MethodDetailModal from "../src/components/MethodDetailModal/MethodDetailModal";
+import BreakdownModal from "../src/components/BreakdownModal/BreakdownModal";
 import { calculateMethod } from "../src/domain/calculator";
 import paymentMethods from "../src/data/paymentMethods";
 
@@ -70,16 +70,15 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Resultado");
   });
 
-  it("no muestra el detalle por defecto: se abre como modal al seleccionar", () => {
+  it("no muestra el detalle por defecto: se abre al seleccionar", () => {
     expect(html).toContain("$317.0271");
-    expect(html).toContain("Selecciona un método de la tabla para abrir");
-    // Sin selección al inicio: ni modal ni paneles de detalle.
-    expect(html).not.toContain("method-modal");
-    expect(html).not.toContain("method-modal-panel");
+    expect(html).toContain("Selecciona un método de la tabla para ver");
+    expect(html).not.toContain("breakdown-modal");
+    expect(html).not.toContain("Requisitos");
   });
 });
 
-describe("MethodDetailModal (render SSR)", () => {
+describe("BreakdownModal (render SSR)", () => {
   // Escenario del Excel: monto 50000 JPY con las tasas por defecto.
   const exchangeRates = {
     visa: 157.710157,
@@ -90,20 +89,23 @@ describe("MethodDetailModal (render SSR)", () => {
     (candidate) => candidate.id === "binance-card",
   );
   if (!method) {
-    throw new Error("El método binance-paypay debe existir en la data.");
+    throw new Error("El método binance-card debe existir en la data.");
   }
   const okResult = calculateMethod(method, 50000, exchangeRates);
   if (okResult.status !== "ok") {
     throw new Error("El caso base debe calcular correctamente.");
   }
-  const modalHtml = renderToString(<MethodDetailModal result={okResult} onClose={() => {}} />);
+  const modalHtml = renderToString(
+    <BreakdownModal result={okResult} onClose={() => {}} />,
+  );
 
-  it("renderiza un diálogo con el nombre del método y sus paneles", () => {
+  it("renderiza un diálogo solo con el desglose del método", () => {
     expect(modalHtml).toContain('role="dialog"');
-    expect(modalHtml).toContain("Binance Card");
-    expect(modalHtml).toContain("Información del método");
     expect(modalHtml).toContain("Desglose del cálculo");
-    expect(modalHtml).toContain("aria-label=\"Cerrar detalle\"");
+    expect(modalHtml).toContain("Binance Card");
+    expect(modalHtml).toContain('aria-label="Cerrar desglose"');
+    // La información del método vive debajo de la tabla, no en el modal.
+    expect(modalHtml).not.toContain("Requisitos");
   });
 
   it("colorea el desglose con los grupos de la tabla", () => {
@@ -116,8 +118,10 @@ describe("MethodDetailModal (render SSR)", () => {
 
   it("renderiza el estado de error del método en el modal", () => {
     const errorResult = calculateMethod(method, null, exchangeRates);
-    const errorHtml = renderToString(<MethodDetailModal result={errorResult} onClose={() => {}} />);
+    const errorHtml = renderToString(
+      <BreakdownModal result={errorResult} onClose={() => {}} />,
+    );
     expect(errorHtml).toContain("No se puede calcular con los valores actuales");
-    expect(errorHtml).not.toContain("Desglose del cálculo");
+    expect(errorHtml).not.toContain("Costo antes de cashback");
   });
 });

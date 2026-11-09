@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
 import ComparisonTable, {
   type SortKey,
   type SortState,
 } from "./components/ComparisonTable/ComparisonTable";
 import InputPanel from "./components/InputPanel/InputPanel";
-import MethodDetailModal from "./components/MethodDetailModal/MethodDetailModal";
+import PaymentMethodDetails from "./components/PaymentMethodDetails/PaymentMethodDetails";
 import paymentMethods from "./data/paymentMethods";
 import type { ExchangeRateInput } from "./domain/types";
 import { useComparison } from "./hooks/useComparison";
@@ -26,6 +27,7 @@ export default function App() {
     DEFAULT_EXCHANGE_RATES,
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [breakdownId, setBreakdownId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState>({
     key: "totalUSD",
     direction: "asc",
@@ -68,13 +70,21 @@ export default function App() {
     [results, selectedId],
   );
 
+  const breakdownResult = useMemo(
+    () =>
+      breakdownId === null
+        ? undefined
+        : results.find((result) => result.method.id === breakdownId),
+    [results, breakdownId],
+  );
+
   const handleSelect = useCallback((id: string) => {
-    // Cualquier clic en un método (fila o nombre) abre su modal de detalle.
     setSelectedId(id);
+    setBreakdownId(id);
   }, []);
 
-  const closeDetails = useCallback(() => {
-    setSelectedId(null);
+  const closeBreakdown = useCallback(() => {
+    setBreakdownId(null);
   }, []);
 
   const handleSortChange = useCallback((key: SortKey) => {
@@ -145,13 +155,24 @@ export default function App() {
         />
 
         {selectedResult ? (
-          <MethodDetailModal result={selectedResult} onClose={closeDetails} />
+          selectedResult.status === "ok" ? (
+            <PaymentMethodDetails method={selectedResult.method} />
+          ) : (
+            <section className="card" aria-label="Detalle no disponible">
+              <div className="card-head">
+                <h2 className="card-title">{selectedResult.method.name}</h2>
+                <p className="card-subtitle">{selectedResult.reason}</p>
+              </div>
+            </section>
+          )
         ) : (
           <p className="details-hint">
-            Selecciona un método de la tabla para abrir un panel con su
-            información, requisitos y el desglose del cálculo.
+            Selecciona un método de la tabla para ver su información debajo y
+            abrir el desglose del cálculo en un modal.
           </p>
         )}
+
+        <BreakdownModal result={breakdownResult} onClose={closeBreakdown} />
       </main>
 
       <footer className="app-footer">

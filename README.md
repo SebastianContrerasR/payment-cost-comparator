@@ -9,7 +9,7 @@ el costo final, destacando el método más económico.
 - **Moneda origen:** JPY · **Moneda de referencia:** USD
 - SPA sin backend: todo corre en el navegador, los datos son configuración por código.
 - Tabla configurable: columnas ocultables desde el botón **Columnas** (con *Seleccionar todo*/*Restablecer*, preferencia persistida) y cabeceras agrupadas por color con **leyenda** al pie: identidad, conversión, comisiones, cashback y resultado.
-- Optimizada para móvil: tabla compacta con la columna del método fija, el selector de columnas como hoja inferior y el detalle del método como hoja inferior (modal).
+- Optimizada para móvil: tabla compacta con la columna del método fija, el selector de columnas como hoja inferior y el desglose del cálculo en un modal/hoja inferior; la información del método se muestra debajo de la tabla.
 - Desplegada en **GitHub Pages**.
 
 ---

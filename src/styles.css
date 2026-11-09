@@ -462,14 +462,10 @@ code {
 }
 
 /* ------------------------------------------------------------------ *
- * Detalle y desglose
+ * Modal del desglose del cálculo
  * ------------------------------------------------------------------ */
 
-/* ------------------------------------------------------------------ *
- * Modal de detalle del método
- * ------------------------------------------------------------------ */
-
-.method-modal-overlay {
+.breakdown-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -480,10 +476,10 @@ code {
   background: rgb(15 26 46 / 0.46);
 }
 
-.method-modal {
+.breakdown-modal {
   display: flex;
   flex-direction: column;
-  width: min(840px, 100%);
+  width: min(560px, 100%);
   max-height: calc(100vh - 52px);
   background: var(--surface);
   border-radius: var(--radius);
@@ -505,12 +501,12 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .method-modal {
+  .breakdown-modal {
     animation: none;
   }
 }
 
-.method-modal-head {
+.breakdown-modal-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -520,18 +516,18 @@ code {
   border-bottom: 1px solid var(--border);
 }
 
-.method-modal-head h2 {
+.breakdown-modal-head h2 {
   font-size: 19px;
   letter-spacing: -0.2px;
 }
 
-.method-modal-sub {
+.breakdown-modal-sub {
   margin: 2px 0 0;
   font-size: 13px;
   color: var(--text-muted);
 }
 
-.method-modal-close {
+.breakdown-modal-close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -551,44 +547,20 @@ code {
     color 120ms ease;
 }
 
-.method-modal-close:hover,
-.method-modal-close:focus-visible {
+.breakdown-modal-close:hover,
+.breakdown-modal-close:focus-visible {
   border-color: var(--accent);
   color: var(--accent);
   outline: none;
 }
 
-.method-modal-body {
+.breakdown-modal-body {
   overflow-y: auto;
   padding: 16px 18px;
   -webkit-overflow-scrolling: touch;
 }
 
-.method-modal-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.method-modal-panel {
-  min-width: 0;
-  padding: 12px 14px;
-  background: #fbfdff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-small);
-}
-
-.method-modal-panel-title {
-  margin-bottom: 10px;
-  font-size: 12.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-}
-
-.method-modal-status {
+.breakdown-modal-status {
   margin: 0;
   padding: 10px 12px;
   border-radius: var(--radius-small);
@@ -597,14 +569,17 @@ code {
   font-size: 13.5px;
 }
 
-.method-info .chip-row {
-  margin-bottom: 12px;
+.breakdown-modal-body .breakdown {
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .details-body {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
   gap: 16px;
+  align-items: start;
 }
 
 .details-section h3 {
@@ -614,11 +589,6 @@ code {
   letter-spacing: 0.5px;
   color: var(--text-muted);
   margin-bottom: 7px;
-}
-
-.details-section + .details-section {
-  border-top: 1px dashed var(--border);
-  padding-top: 14px;
 }
 
 .info-list {
@@ -1023,10 +993,6 @@ code {
 }
 
 @media (max-width: 880px) {
-  .method-modal-grid {
-    grid-template-columns: 1fr;
-  }
-
   .page {
     padding: 20px 14px calc(32px + env(safe-area-inset-bottom, 0px));
   }
@@ -1093,28 +1059,23 @@ code {
     padding-bottom: 2px;
   }
 
-  /* Modal de detalle: hoja inferior de casi toda la pantalla, con el
-     encabezado fijo arriba y el contenido desplazándose dentro. */
-  .method-modal-overlay {
+  /* Modal del desglose: hoja inferior de casi toda la pantalla. */
+  .breakdown-modal-overlay {
     align-items: flex-end;
     padding: 0;
   }
 
-  .method-modal {
+  .breakdown-modal {
     width: 100%;
     max-height: calc(92vh - env(safe-area-inset-bottom, 0px));
     border-radius: var(--radius) var(--radius) 0 0;
   }
 
-  .method-modal-head {
+  .breakdown-modal-head {
     padding: 11px 14px;
   }
 
-  .method-modal-body {
+  .breakdown-modal-body {
     padding: 13px 14px calc(15px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .method-modal-panel {
-    padding: 11px 12px;
   }
 }

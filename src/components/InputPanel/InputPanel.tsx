@@ -7,9 +7,28 @@ interface InputPanelProps {
   onExchangeRateChange: (key: string, value: number | null) => void;
 }
 
-const RATE_FIELDS: Array<{ key: string; label: string }> = [
-  { key: "visa", label: "Tipo de cambio Visa" },
-  { key: "mastercard", label: "Tipo de cambio Mastercard" },
+const RATE_FIELDS: Array<{
+  key: string;
+  label: string;
+  externalUrl?: string;
+  externalAriaLabel?: string;
+}> = [
+  {
+    key: "visa",
+    label: "Tipo de cambio Visa",
+    externalUrl:
+      "https://www.visa.com.pe/soporte/consumidores/viajes/exchange-rate-calculator.html",
+    externalAriaLabel:
+      "Tipo de cambio Visa — abrir calculadora de Visa en una pestaña nueva",
+  },
+  {
+    key: "mastercard",
+    label: "Tipo de cambio Mastercard",
+    externalUrl:
+      "https://www.mastercard.com/pe/es/personal/get-support/currency-exchange-rate-converter.html",
+    externalAriaLabel:
+      "Tipo de cambio Mastercard — abrir calculadora de Mastercard en una pestaña nueva",
+  },
   { key: "paypay", label: "Tipo de cambio PayPay" },
 ];
 
@@ -30,6 +49,8 @@ interface NumericInputProps {
   value: number | null;
   step: string;
   onChange: (value: number | null) => void;
+  externalUrl?: string;
+  externalAriaLabel?: string;
 }
 
 function NumericInput({
@@ -39,11 +60,26 @@ function NumericInput({
   value,
   step,
   onChange,
+  externalUrl,
+  externalAriaLabel,
 }: NumericInputProps) {
   return (
     <div className="field">
       <label className="field-label" htmlFor={id}>
-        {label}
+        {externalUrl ? (
+          <a
+            className="field-label-link"
+            href={externalUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={externalAriaLabel}
+            title={externalAriaLabel}
+          >
+            {label}
+          </a>
+        ) : (
+          label
+        )}
       </label>
       <input
         className={`field-input${value === null ? " field-input-empty" : ""}`}
@@ -93,6 +129,8 @@ export function InputPanel({
             value={exchangeRates[field.key] ?? null}
             step="0.0001"
             onChange={(value) => onExchangeRateChange(field.key, value)}
+            externalUrl={field.externalUrl}
+            externalAriaLabel={field.externalAriaLabel}
           />
         ))}
       </div>

@@ -126,6 +126,7 @@ interface ComparisonTableProps {
   cheapestId: string | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onOpenBreakdown: (id: string) => void;
   sort: SortState;
   onSortChange: (key: SortKey) => void;
   visibleColumns: readonly SortKey[];
@@ -192,6 +193,28 @@ export function sortResults(
   });
 }
 
+function BreakdownIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M7 3.5h10v17l-1.7-1.3-1.7 1.3-1.6-1.3-1.7 1.3-1.6-1.3L7 20.5v-17z" />
+      <path d="M9.2 7.5h5.6" />
+      <path d="M9.2 10.2h3.4" />
+      <path d="M9.2 12.9h4.2" />
+    </svg>
+  );
+}
+
 function formatFeeRule(
   rule: OkCalculationResult["breakdown"]["otherFeeLines"][number]["rule"],
 ): string {
@@ -205,6 +228,7 @@ export function ComparisonTable({
   cheapestId,
   selectedId,
   onSelect,
+  onOpenBreakdown,
   sort,
   onSortChange,
   visibleColumns,
@@ -233,14 +257,29 @@ export function ComparisonTable({
       case "name":
         return (
           <div className="cell-name">
-            <button
-              type="button"
-              className="method-link"
-              aria-pressed={selectedId === method.id}
-              onClick={() => onSelect(method.id)}
-            >
-              {method.name}
-            </button>
+            <div className="cell-name-row">
+              <button
+                type="button"
+                className="method-link"
+                data-method-id={method.id}
+                aria-pressed={selectedId === method.id}
+                onClick={() => onSelect(method.id)}
+              >
+                {method.name}
+              </button>
+              <button
+                type="button"
+                className="breakdown-icon-btn"
+                aria-label={`Ver desglose de ${method.name}`}
+                title={`Ver desglose de ${method.name}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpenBreakdown(method.id);
+                }}
+              >
+                <BreakdownIcon />
+              </button>
+            </div>
             {cheapestId === method.id ? (
               <span className="chip chip-cheap">Más barato</span>
             ) : null}
@@ -386,7 +425,16 @@ export function ComparisonTable({
               ) : (
                 <tr key={row.method.id} className="row-error">
                   <td colSpan={columns.length} className="cell-error">
-                    {row.method.name}: no se puede calcular — {row.reason}
+                    {row.method.name}: no se puede calcular — {row.reason}{" "}
+                    <button
+                      type="button"
+                      className="breakdown-icon-btn"
+                      aria-label={`Ver desglose de ${row.method.name}`}
+                      title={`Ver desglose de ${row.method.name}`}
+                      onClick={() => onOpenBreakdown(row.method.id)}
+                    >
+                      <BreakdownIcon />
+                    </button>
                   </td>
                 </tr>
               ),

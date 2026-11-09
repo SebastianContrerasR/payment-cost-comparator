@@ -3,6 +3,7 @@ import { formatPercent, formatUsd } from "../../utils/currency";
 
 interface PaymentMethodDetailsProps {
   method: PaymentMethod;
+  onOpenBreakdown?: (id: string) => void;
 }
 
 function FeeListItems({ method }: { method: PaymentMethod }) {
@@ -40,26 +41,8 @@ function FeeListItems({ method }: { method: PaymentMethod }) {
   );
 }
 
-export function PaymentMethodDetails({ method }: PaymentMethodDetailsProps) {
+export function PaymentMethodDetailsBody({ method }: PaymentMethodDetailsProps) {
   return (
-    <article className="card details-card">
-      <div className="card-head">
-        <h2 className="card-title">{method.name}</h2>
-        <p className="card-subtitle">
-          {method.provider} · {method.network}
-          {method.enabled ? "" : " · Deshabilitado"}
-        </p>
-        <div className="chip-row">
-          <span className="chip">Marca: {method.network}</span>
-          {method.cashback.currency ? (
-            <span className="chip chip-cashback">
-              Cashback en {method.cashback.currency}
-            </span>
-          ) : null}
-          {!method.enabled ? <span className="chip">Inactivo</span> : null}
-        </div>
-      </div>
-
       <div className="details-body">
         <section className="details-section">
           <h3>Comisiones</h3>
@@ -142,6 +125,44 @@ export function PaymentMethodDetails({ method }: PaymentMethodDetailsProps) {
           )}
         </section>
       </div>
+  );
+}
+
+export function PaymentMethodDetails({
+  method,
+  onOpenBreakdown,
+}: PaymentMethodDetailsProps) {
+  return (
+    <article className="card details-card">
+      <div className="card-head">
+        <h2 className="card-title">{method.name}</h2>
+        <p className="card-subtitle">
+          {method.provider} · {method.network}
+          {method.enabled ? "" : " · Deshabilitado"}
+        </p>
+        <div className="chip-row">
+          <span className="chip">Marca: {method.network}</span>
+          {method.cashback.currency ? (
+            <span className="chip chip-cashback">
+              Cashback en {method.cashback.currency}
+            </span>
+          ) : null}
+          {!method.enabled ? <span className="chip">Inactivo</span> : null}
+        </div>
+        {onOpenBreakdown ? (
+          <div className="details-actions">
+            <button
+              type="button"
+              className="details-open-breakdown"
+              aria-label={`Ver desglose del cálculo de ${method.name}`}
+              onClick={() => onOpenBreakdown(method.id)}
+            >
+              Ver desglose del cálculo
+            </button>
+          </div>
+        ) : null}
+      </div>
+      <PaymentMethodDetailsBody method={method} />
     </article>
   );
 }

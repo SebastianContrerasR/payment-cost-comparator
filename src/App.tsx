@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
 import ComparisonTable, {
   type SortKey,
   type SortState,
 } from "./components/ComparisonTable/ComparisonTable";
 import InputPanel from "./components/InputPanel/InputPanel";
-import PaymentMethodDetails from "./components/PaymentMethodDetails/PaymentMethodDetails";
+import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
+import PaymentMethodPanel from "./components/PaymentMethodPanel/PaymentMethodPanel";
 import paymentMethods from "./data/paymentMethods";
 import type { ExchangeRateInput } from "./domain/types";
 import { useComparison } from "./hooks/useComparison";
@@ -78,12 +78,27 @@ export default function App() {
 
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id);
+  }, []);
+
+  const handleOpenBreakdown = useCallback((id: string) => {
     setBreakdownId(id);
   }, []);
 
   const closeBreakdown = useCallback(() => {
     setBreakdownId(null);
   }, []);
+
+  const handleClosePanel = useCallback(() => {
+    const previousId = selectedId;
+    setSelectedId(null);
+    if (previousId && typeof document !== "undefined") {
+      window.setTimeout(() => {
+        (document.querySelector(
+          `[data-method-id="${previousId}"]`,
+        ) as HTMLElement | null)?.focus({ preventScroll: true });
+      }, 0);
+    }
+  }, [selectedId]);
 
   const handleSortChange = useCallback((key: SortKey) => {
     setSort((previous) =>
@@ -144,6 +159,7 @@ export default function App() {
           cheapestId={cheapestId}
           selectedId={selectedId}
           onSelect={handleSelect}
+          onOpenBreakdown={handleOpenBreakdown}
           sort={sort}
           onSortChange={handleSortChange}
           visibleColumns={visibleColumns}
@@ -153,20 +169,15 @@ export default function App() {
         />
 
         {selectedResult ? (
-          selectedResult.status === "ok" ? (
-            <PaymentMethodDetails method={selectedResult.method} />
-          ) : (
-            <section className="card" aria-label="Detalle no disponible">
-              <div className="card-head">
-                <h2 className="card-title">{selectedResult.method.name}</h2>
-                <p className="card-subtitle">{selectedResult.reason}</p>
-              </div>
-            </section>
-          )
+          <PaymentMethodPanel
+            result={selectedResult}
+            isCheapest={selectedResult.method.id === cheapestId}
+            onClose={handleClosePanel}
+          />
         ) : (
           <p className="details-hint">
-            Selecciona un método de la tabla para ver su información debajo y
-            abrir el desglose del cálculo en un modal.
+            Selecciona un método de la tabla para ver su información debajo. Usa el
+            icono junto al nombre si quieres ver el desglose del cálculo.
           </p>
         )}
 

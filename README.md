@@ -206,6 +206,7 @@ automáticamente y de ahí deriva la ruta base:
 
 ## Referencias
 
+- `AGENTS.md`: estándares y convenciones del proyecto (devs y agentes AI).
 - `docs/example.md`: tabla Excel de referencia (inputs y totales esperados).
 - `docs/payment-methods-info.md`: fichas documentales por método (comisiones,
   cashback, requisitos y enlaces oficiales).

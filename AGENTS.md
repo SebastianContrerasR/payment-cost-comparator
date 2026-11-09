@@ -74,6 +74,8 @@ Reglas de separación:
 
 - **Cero comentarios en el código** (TypeScript, TSX, CSS y configs
   como `vite.config.ts` y `commitlint.config.js`).
+  Excepción: las directivas funcionales del compilador como
+  `/// <reference>` en `.d.ts` no son comentarios.
   El código debe documentarse solo: nombres claros, funciones pequeñas.
 - Las decisiones y reglas que hoy viven en los comentarios deben quedar
   en este archivo, en el README o en `docs/`.

@@ -15,7 +15,6 @@ interface ColumnPickerProps {
   onReset: () => void;
 }
 
-/** Selector de columnas de la tabla: botón con panel de checkboxes. */
 export function ColumnPicker({
   columns,
   visible,

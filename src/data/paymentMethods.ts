@@ -1,27 +1,5 @@
 import type { PaymentMethod } from "../domain/types";
 
-/**
- * Registro de métodos de pago del comparador (configuración por código).
- *
- * Agregar un método nuevo NO requiere modificar el motor de cálculo ni los
- * componentes: registra aquí un objeto `PaymentMethod` y la tabla lo mostrará
- * automáticamente.
- *
- * Las configuraciones reproducen por defecto los escenarios utilizados en la
- * hoja Excel de referencia (docs/example.md) y documentados en
- * docs/payment-methods-info.md:
- *
- * - Binance Card: comisión de conversión de 0.1%, correspondiente al
- *   escenario de pago con USDC (la comisión general es 0.9%).
- * - Bybit Card: la conversión de criptomonedas (0.9%) y el FX Padding (1%)
- *   se combinan de forma aditiva (0.9% + 1% = 1.9%) y se aplican como un
- *   único multiplicador sobre el monto tras el FX Fee.
- * - MEXC Card: el 1% corresponde a la Transaction Fee, modelada como regla
- *   de "otras comisiones" (la conversión de criptomonedas del escenario es 0%).
- * - Bitget: cashback de 3%, escenario elegido en Excel (gasto mensual > 100 USD);
- *   el cashback base de la tarjeta es 2%.
- * - El límite mensual de cashback se considera completamente disponible.
- */
 const paymentMethods: PaymentMethod[] = [
   {
     id: "binance-paypay",
@@ -115,8 +93,7 @@ const paymentMethods: PaymentMethod[] = [
     enabled: true,
     fees: {
       fxFee: 0.02,
-      // Escenario del Excel: pago con USDC, con 0.1% de comisión de conversión.
-      // La comisión general de conversión de criptomonedas es 0.9%.
+
       cryptoFee: 0.001,
       otherFees: [],
     },
@@ -156,10 +133,7 @@ const paymentMethods: PaymentMethod[] = [
     enabled: true,
     fees: {
       fxFee: 0.02,
-      // Escenario del Excel: la comisión de conversión de criptomonedas (0.9%)
-      // y el FX Padding (1%) se combinan de forma aditiva (0.9% + 1% = 1.9%)
-      // y se aplican como un único multiplicador sobre el monto tras el FX Fee.
-      // Mantener ambos conceptos documentados para reproducir el resultado.
+
       cryptoFee: 0.019,
       otherFees: [],
     },
@@ -246,8 +220,7 @@ const paymentMethods: PaymentMethod[] = [
       otherFees: [],
     },
     cashback: {
-      // Escenario del Excel: 3% (requiere un gasto mensual superior a 100 USD).
-      // El cashback base de la tarjeta es 2%.
+
       rate: 0.03,
       cap: 6,
       currency: "",
@@ -322,8 +295,4 @@ const paymentMethods: PaymentMethod[] = [
   },
 ];
 
-/**
- * Orden por defecto: tras ordenar la tabla por TOTAL ascendente, MEXC Card
- * resulta el método más barato con el escenario del Excel.
- */
 export default paymentMethods;

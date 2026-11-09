@@ -5,10 +5,6 @@ interface CalculationBreakdownProps {
   result: OkCalculationResult;
 }
 
-/**
- * Grupo de color del desglose, igual que las cabeceras de la tabla:
- * conversión (azul), comisiones (ámbar), cashback (verde) y total (sólido).
- */
 type BreakdownGroup = "conversion" | "fees" | "cashback" | "result";
 
 interface BreakdownRowProps {
@@ -36,11 +32,6 @@ function BreakdownRow({
   );
 }
 
-/**
- * E. Desglose del cálculo: muestra paso a paso cómo se obtuvo el total del
- * método seleccionado. Cada fila adopta el color del grupo de columna de la
- * tabla al que pertenece (conversión, comisiones, cashback o total).
- */
 export function CalculationBreakdown({
   result,
 }: CalculationBreakdownProps) {

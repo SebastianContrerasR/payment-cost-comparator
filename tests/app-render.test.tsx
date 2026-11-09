@@ -5,7 +5,6 @@ import BreakdownModal from "../src/components/BreakdownModal/BreakdownModal";
 import { calculateMethod } from "../src/domain/calculator";
 import paymentMethods from "../src/data/paymentMethods";
 
-/** Render inicial con los valores por defecto (escenario del Excel). */
 const html = renderToString(<App />);
 
 describe("App (renderizado inicial)", () => {
@@ -37,7 +36,7 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("El método más económico es");
     expect(html).toContain("MEXC Card");
     expect(html).toContain("$307.3994");
-    // Chip del método más barato y fila resaltada.
+
     expect(html).toContain("Más barato");
     expect(html).toContain("row-cheapest");
   });
@@ -47,25 +46,24 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Con comisiones");
     expect(html).toContain("Efectivo");
     expect(html).toContain(">Total<");
-    // Secundarias, ocultas por defecto. "Marca" solo existe en la tabla y en
-    // el detalle (no seleccionado al inicio).
+
     expect(html).not.toContain("Marca");
     expect(html).not.toContain("Ilimitado");
     expect(html).not.toContain("Potencial");
   });
 
   it("colorea las cabeceras por grupo de columna", () => {
-    expect(html).toContain("th-group-identity"); // nombre (fija)
-    expect(html).toContain("th-group-fees"); // Con comisiones
-    expect(html).toContain("th-group-cashback"); // Efectivo
-    expect(html).toContain("th-group-result"); // Total
-    // TC y Base (USD) están ocultas por defecto.
+    expect(html).toContain("th-group-identity");
+    expect(html).toContain("th-group-fees");
+    expect(html).toContain("th-group-cashback");
+    expect(html).toContain("th-group-result");
+
     expect(html).not.toContain("th-group-conversion");
   });
 
   it("muestra la leyenda de grupos de color", () => {
     expect(html).toContain("table-legend");
-    // La leyenda existe aunque sus columnas estén ocultas (avisa del sistema).
+
     expect(html).toContain("Comisiones");
     expect(html).toContain("Resultado");
   });
@@ -79,7 +77,7 @@ describe("App (renderizado inicial)", () => {
 });
 
 describe("BreakdownModal (render SSR)", () => {
-  // Escenario del Excel: monto 50000 JPY con las tasas por defecto.
+
   const exchangeRates = {
     visa: 157.710157,
     mastercard: 157.51008064,
@@ -104,15 +102,15 @@ describe("BreakdownModal (render SSR)", () => {
     expect(modalHtml).toContain("Desglose del cálculo");
     expect(modalHtml).toContain("Binance Card");
     expect(modalHtml).toContain('aria-label="Cerrar desglose"');
-    // La información del método vive debajo de la tabla, no en el modal.
+
     expect(modalHtml).not.toContain("Requisitos");
   });
 
   it("colorea el desglose con los grupos de la tabla", () => {
-    expect(modalHtml).toContain("breakdown-row--conversion"); // TC y conversión
-    expect(modalHtml).toContain("breakdown-row--fees"); // FX/crypto/otras
-    expect(modalHtml).toContain("breakdown-row--cashback"); // potencial/efectivo
-    expect(modalHtml).toContain("breakdown-row--result"); // Total
+    expect(modalHtml).toContain("breakdown-row--conversion");
+    expect(modalHtml).toContain("breakdown-row--fees");
+    expect(modalHtml).toContain("breakdown-row--cashback");
+    expect(modalHtml).toContain("breakdown-row--result");
     expect(modalHtml).toContain("Costo antes de cashback");
   });
 

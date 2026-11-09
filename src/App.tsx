@@ -14,7 +14,6 @@ import { formatUsd } from "./utils/currency";
 
 const DEFAULT_AMOUNT_JPY = 50_000;
 
-/** Tipos de cambio por defecto: referencias del Excel (JPY por USD). */
 const DEFAULT_EXCHANGE_RATES: ExchangeRateInput = {
   visa: 157.710157,
   mastercard: 157.51008064,
@@ -39,7 +38,6 @@ export default function App() {
     reset: resetVisibleColumns,
   } = useVisibleColumns();
 
-  // Si se oculta la columna por la que se ordena, se vuelve a Total ascendente.
   useEffect(() => {
     if (sort.key !== "name" && !visibleColumns.includes(sort.key)) {
       setSort({ key: "totalUSD", direction: "asc" });

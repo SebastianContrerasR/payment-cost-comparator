@@ -8,10 +8,6 @@ import type {
 } from "../src/domain/types";
 import { roundTo } from "../src/utils/currency";
 
-/**
- * Entradas del Excel de referencia (plan 7.1):
- * docs/example.md
- */
 const EXCEL_AMOUNT_JPY = 50_000;
 
 const EXCEL_EXCHANGE_RATES: ExchangeRateInput = {
@@ -20,7 +16,6 @@ const EXCEL_EXCHANGE_RATES: ExchangeRateInput = {
   paypay: 157.71524839,
 };
 
-/** Totales esperados según la tabla principal del Excel. */
 const EXCEL_EXPECTED_TOTALS: Record<string, number> = {
   "binance-paypay": 317.0271,
   "okx-card": 312.3543,
@@ -117,7 +112,6 @@ describe("Pasos intermedios del Excel", () => {
     expect(breakdown.afterCryptoUSD).toBeCloseTo(317.3543223, 4);
     expect(breakdown.totalBeforeCashbackUSD).toBeCloseTo(317.3543223, 4);
     expect(breakdown.potentialCashbackUSD).toBeCloseTo(6.3471, 3);
-    // El potencial supera el límite: se aplica el límite completo.
     expect(breakdown.effectiveCashbackUSD).toBe(5);
     expect(breakdown.totalUSD).toBeCloseTo(312.3543223, 4);
   });
@@ -133,7 +127,6 @@ describe("Pasos intermedios del Excel", () => {
     expect(breakdown.afterFxUSD).toBeCloseTo(323.7888, 4);
     expect(breakdown.afterCryptoUSD).toBeCloseTo(324.1125888, 4);
     expect(breakdown.potentialCashbackUSD).toBeCloseTo(6.4823, 3);
-    // El potencial queda por debajo del límite: se aplica completo.
     expect(breakdown.effectiveCashbackUSD).toBe(breakdown.potentialCashbackUSD);
     expect(breakdown.totalUSD).toBeCloseTo(317.6303370, 4);
   });
@@ -148,7 +141,6 @@ describe("Pasos intermedios del Excel", () => {
     expect(breakdown.afterFxUSD).toBeCloseTo(323.7888, 4);
     expect(breakdown.afterCryptoUSD).toBeCloseTo(329.9407872, 4);
     expect(breakdown.potentialCashbackUSD).toBeCloseTo(6.5988, 3);
-    // El potencial supera el límite de 5 USDT.
     expect(breakdown.effectiveCashbackUSD).toBe(5);
     expect(breakdown.totalUSD).toBeCloseTo(324.9407872, 4);
   });
@@ -163,7 +155,6 @@ describe("Pasos intermedios del Excel", () => {
     expect(breakdown.afterFxUSD).toBeCloseTo(326.5484036, 4);
     expect(breakdown.afterCryptoUSD).toBeCloseTo(326.5484036, 4);
     expect(breakdown.potentialCashbackUSD).toBeCloseTo(3.2655, 3);
-    // Sin límite: el efectivo coincide con el potencial.
     expect(breakdown.effectiveCashbackUSD).toBe(breakdown.potentialCashbackUSD);
     expect(breakdown.totalUSD).toBeCloseTo(323.2829195, 4);
   });
@@ -196,7 +187,6 @@ describe("Pasos intermedios del Excel", () => {
     expect(breakdown.otherFeesCostUSD).toBeCloseTo(3.1703729, 3);
     expect(breakdown.totalBeforeCashbackUSD).toBeCloseTo(320.2076579, 4);
     expect(breakdown.potentialCashbackUSD).toBeCloseTo(12.8083, 3);
-    // El potencial queda por debajo del límite de 100 USDT.
     expect(breakdown.effectiveCashbackUSD).toBe(breakdown.potentialCashbackUSD);
     expect(breakdown.totalUSD).toBeCloseTo(307.3993516, 4);
   });
@@ -253,7 +243,6 @@ describe("Validaciones de entrada", () => {
 
   it("un tipo de cambio inválido solo afecta a los métodos de esa red", () => {
     const comparison = compareMethods(paymentMethods, EXCEL_AMOUNT_JPY, {
-      // Visa inválida: afecta a OKX, IO, Bitget y MEXC, pero no a la tabla completa.
       visa: 0,
       mastercard: 157.51008064,
       paypay: 157.71524839,
@@ -264,12 +253,10 @@ describe("Validaciones de entrada", () => {
     expect(errorIds).toEqual(
       expect.arrayContaining(["okx-card", "io", "bitget-card", "mexc-card"]),
     );
-    // Con Visa inválida, quedan válidos Binance PayPay, Binance Card y Bybit Card.
     expect(comparison.cheapestId).toBe("binance-paypay");
   });
 });
 
-/** Método configurable para casos límite del motor. */
 const BASE_METHOD: PaymentMethod = {
   id: "test-method",
   name: "Test Method",
@@ -307,7 +294,6 @@ describe("Comportamiento del motor", () => {
     });
     const result = calculateOk(method, 10_000, { visa: 100 });
     const { breakdown } = result;
-    // base = 100 → x1.01 = 101 → +1 = 102
     expect(breakdown.baseAmountUSD).toBe(100);
     expect(breakdown.otherFeesCostUSD).toBeCloseTo(2, 6);
     expect(breakdown.totalBeforeCashbackUSD).toBeCloseTo(102, 6);
@@ -322,7 +308,6 @@ describe("Comportamiento del motor", () => {
       },
       cashback: { rate: 0.02, cap: null, currency: "", base: "amountAfterFees" },
     });
-    // Mismo escenario que OKX Card (50,000 JPY @ visa) para comparar efectos.
     const okx = calculateOk(methodById("okx-card"), 50_000, EXCEL_EXCHANGE_RATES);
     const result = calculateOk(method, 50_000, EXCEL_EXCHANGE_RATES);
     expect(result.breakdown.otherFeesCostUSD).toBe(2);
@@ -376,7 +361,6 @@ describe("Comportamiento del motor", () => {
   });
 
   it("variación del tipo de cambio escala proporcionalmente el total (sin cap)", () => {
-    // IO no tiene cap de cashback, así que su total es lineal en el TC.
     const referenceV = calculateOk(
       methodById("io"),
       EXCEL_AMOUNT_JPY,
@@ -412,7 +396,6 @@ describe("Comportamiento del motor", () => {
     expect(comparison.results.map((result) => result.method.id)).not.toContain(
       "mexc-card",
     );
-    // Sin MEXC, el más barato pasa a ser OKX Card.
     expect(comparison.cheapestId).toBe("okx-card");
   });
 });

@@ -59,7 +59,6 @@ function NumericInput({
   );
 }
 
-/** A. Panel de entrada: monto en JPY y tipos de cambio por red. */
 export function InputPanel({
   amountJPY,
   onAmountChange,

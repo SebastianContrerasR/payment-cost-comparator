@@ -6,10 +6,6 @@ import type {
   PaymentMethod,
 } from "../domain/types";
 
-/**
- * Recalcula la comparación completa cada vez que cambian el monto en JPY o
- * los tipos de cambio, memoriaizando el resultado entre renders.
- */
 export function useComparison(
   methods: readonly PaymentMethod[],
   amountJPY: number | null,

@@ -40,7 +40,6 @@ function FeeListItems({ method }: { method: PaymentMethod }) {
   );
 }
 
-/** D. Panel de detalle con la información complementaria del método. */
 export function PaymentMethodDetails({ method }: PaymentMethodDetailsProps) {
   return (
     <article className="card details-card">

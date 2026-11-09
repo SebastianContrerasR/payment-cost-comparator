@@ -1,7 +1,3 @@
-/* ------------------------------------------------------------------ *
- * Base
- * ------------------------------------------------------------------ */
-
 :root {
   color-scheme: light;
 
@@ -90,10 +86,6 @@ code {
   padding: 1px 5px;
 }
 
-/* ------------------------------------------------------------------ *
- * Encabezado y pie
- * ------------------------------------------------------------------ */
-
 .app-header {
   padding: 6px 2px 2px;
 }
@@ -123,10 +115,6 @@ code {
   padding-top: 14px;
 }
 
-/* ------------------------------------------------------------------ *
- * Tarjetas
- * ------------------------------------------------------------------ */
-
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -152,10 +140,6 @@ code {
   color: var(--text-muted);
   font-size: 13.5px;
 }
-
-/* ------------------------------------------------------------------ *
- * Chips
- * ------------------------------------------------------------------ */
 
 .chip {
   display: inline-flex;
@@ -188,10 +172,6 @@ code {
   border-color: #c8d8ff;
   color: var(--accent);
 }
-
-/* ------------------------------------------------------------------ *
- * Panel de entrada
- * ------------------------------------------------------------------ */
 
 .input-grid {
   display: grid;
@@ -241,10 +221,6 @@ code {
   color: var(--text-muted);
 }
 
-/* ------------------------------------------------------------------ *
- * Banner de resumen
- * ------------------------------------------------------------------ */
-
 .summary-banner {
   display: flex;
   align-items: center;
@@ -261,27 +237,19 @@ code {
   color: var(--success);
 }
 
-/* ------------------------------------------------------------------ *
- * Tabla comparativa
- * ------------------------------------------------------------------ */
-
 .table-card {
   padding: 0;
 }
 
 .table-scroll {
   overflow-x: auto;
-  /* El clipping se traslada aquí desde la tarjeta (que ya no usa
-     overflow: hidden) para no cortar el panel del selector de columnas; el
-     radio inferior mantiene las esquinas redondeadas de la tarjeta. */
+
   border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .comparison-table {
   width: 100%;
-  /* Separado (no "collapse"): las celdas congeladas conservan sus propias
-     líneas al desplazarse. Sin ancho mínimo forzado: en móvil la tabla solo
-     se desplaza tanto como lo piden las columnas visibles. */
+
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13.5px;
@@ -340,9 +308,6 @@ code {
   vertical-align: top;
 }
 
-/* Primera columna congelada: el nombre del método sigue visible al
-   desplazarse horizontalmente. El separador se dibuja con box-shadow para
-   que no se desplace con el scroll. */
 .comparison-table thead th.col-first,
 .comparison-table tbody td.col-first {
   position: sticky;
@@ -379,7 +344,6 @@ code {
   background: #dff2e8;
 }
 
-/* La celda congelada necesita fondo opaco propio en cada estado de fila. */
 .comparison-table tbody tr:not(.row-error):hover td.col-first {
   background: #f6f9fe;
 }
@@ -460,10 +424,6 @@ code {
   background: var(--danger-soft);
   font-size: 13px;
 }
-
-/* ------------------------------------------------------------------ *
- * Modal del desglose del cálculo
- * ------------------------------------------------------------------ */
 
 .breakdown-modal-overlay {
   position: fixed;
@@ -648,7 +608,7 @@ code {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  /* Espacio para el tinte de grupo: fila con esquinas y acento lateral. */
+
   padding: 2px 9px;
   border-radius: 6px;
 }
@@ -689,7 +649,6 @@ code {
   color: var(--text);
 }
 
-/* Colores por grupo, los mismos de las cabeceras de la tabla. */
 .breakdown-row--conversion {
   background: #e4efff;
   box-shadow: inset 3px 0 0 #2456e6;
@@ -720,7 +679,6 @@ code {
   font-weight: 700;
 }
 
-/* Total final: azul sólido con texto blanco, como la cabecera "Total". */
 .breakdown-row--result {
   background: #1d4ed8;
   box-shadow: inset 3px 0 0 #163075;
@@ -743,10 +701,6 @@ code {
   text-align: center;
   margin: 2px 0 12px;
 }
-
-/* ------------------------------------------------------------------ *
- * Toolbar de la tabla y selector de columnas
- * ------------------------------------------------------------------ */
 
 .table-toolbar {
   display: flex;
@@ -869,10 +823,6 @@ code {
   color: var(--accent);
 }
 
-/* ------------------------------------------------------------------ *
- * Cabeceras por grupo de columnas
- * ------------------------------------------------------------------ */
-
 .comparison-table .th-group-conversion .sort-indicator.is-active,
 .comparison-table .th-group-fees .sort-indicator.is-active,
 .comparison-table .th-group-cashback .sort-indicator.is-active,
@@ -919,10 +869,6 @@ code {
 .comparison-table thead th.th-group-result .th-sort:hover {
   color: #dbe5ff;
 }
-
-/* ------------------------------------------------------------------ *
- * Leyenda de grupos de color
- * ------------------------------------------------------------------ */
 
 .table-legend {
   display: flex;
@@ -976,10 +922,6 @@ code {
   border-color: #163075;
 }
 
-/* ------------------------------------------------------------------ *
- * Utilidades y responsive
- * ------------------------------------------------------------------ */
-
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1002,10 +944,6 @@ code {
   }
 }
 
-/* Móvil angosto: la tabla se compacta, el selector de columnas se abre
-   como hoja inferior fija (position: fixed escapa del clipping de la
-   tarjeta, y el desplazamiento interno funciona en pantallas chicas) y el
-   modal de detalle pasa a hoja inferior de casi toda la pantalla. */
 @media (max-width: 640px) {
   .comparison-table {
     font-size: 13px;
@@ -1029,7 +967,6 @@ code {
     gap: 5px 12px;
   }
 
-  /* iOS Safari hace auto-zoom al enfocar inputs con font-size < 16px. */
   .field-input {
     font-size: 16px;
   }
@@ -1059,7 +996,6 @@ code {
     padding-bottom: 2px;
   }
 
-  /* Modal del desglose: hoja inferior de casi toda la pantalla. */
   .breakdown-modal-overlay {
     align-items: flex-end;
     padding: 0;

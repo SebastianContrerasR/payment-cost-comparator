@@ -32,7 +32,7 @@ function readStoredVisibleColumns(): SortKey[] {
     if (!Array.isArray(parsed)) {
       return DEFAULT_VISIBLE_COLUMNS;
     }
-    // Se descartan claves desconocidas (versiones previas del esquema).
+
     const knownKeys = new Set<string>(ALL_COLUMN_KEYS);
     const cleaned = (parsed as unknown[]).filter(
       (value): value is string =>
@@ -43,15 +43,11 @@ function readStoredVisibleColumns(): SortKey[] {
     }
     return toSortKeys(cleaned);
   } catch {
-    // JSON inválido o almacenamiento no disponible: preferencias por defecto.
+
     return DEFAULT_VISIBLE_COLUMNS;
   }
 }
 
-/**
- * Estado de columnas visibles de la tabla, persistido en localStorage.
- * Devuelve { visibles, alternar columna, seleccionar todas, restablecer }.
- */
 export function useVisibleColumns(): {
   visibleColumns: SortKey[];
   toggleColumn: (key: SortKey) => void;
@@ -69,13 +65,13 @@ export function useVisibleColumns(): {
         JSON.stringify(visibleColumns),
       );
     } catch {
-      // Almacenamiento no disponible (navegador privado): no persiste.
+
     }
   }, [visibleColumns]);
 
   const toggleColumn = useCallback((key: SortKey) => {
     if (key === "name") {
-      return; // La columna del método está siempre visible.
+      return;
     }
     setVisibleColumns((previous) =>
       previous.includes(key)

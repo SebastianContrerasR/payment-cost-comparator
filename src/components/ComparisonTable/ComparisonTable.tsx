@@ -28,7 +28,6 @@ export interface SortState {
 
 type ColumnGroup = "identity" | "conversion" | "fees" | "cashback" | "result";
 
-/** Cabeceras de la tabla y su grupo de color (para la leyenda). */
 const COLUMN_GROUPS: readonly { id: ColumnGroup; label: string }[] = [
   { id: "identity", label: "Identidad" },
   { id: "conversion", label: "Conversión" },
@@ -42,7 +41,7 @@ interface ColumnDef {
   label: string;
   align: "left" | "right";
   group: ColumnGroup;
-  /** Tooltip de la cabecera para las abreviaturas. */
+
   description?: string;
 }
 
@@ -111,7 +110,6 @@ const COLUMNS: ColumnDef[] = [
   { key: "totalUSD", label: "Total", align: "right", group: "result" },
 ];
 
-/** Columnas mostradas por defecto; "Método" está siempre visible. */
 export const DEFAULT_VISIBLE_COLUMNS: SortKey[] = [
   "name",
   "totalBeforeCashbackUSD",
@@ -119,7 +117,6 @@ export const DEFAULT_VISIBLE_COLUMNS: SortKey[] = [
   "totalUSD",
 ];
 
-/** Todas las claves de columna, para validar la preferencia guardada. */
 export const ALL_COLUMN_KEYS: readonly SortKey[] = COLUMNS.map(
   (column) => column.key,
 );
@@ -144,7 +141,6 @@ function otherFeesTotalUSD(row: OkCalculationResult): number {
   );
 }
 
-/** Accesor de orden por columna; los campos sin límite se ordenan como ∞. */
 const SORT_ACCESSORS: Record<
   SortKey,
   (row: OkCalculationResult) => number | string
@@ -165,7 +161,6 @@ const SORT_ACCESSORS: Record<
   totalUSD: (row) => row.breakdown.totalUSD,
 };
 
-/** Ordena los resultados; las filas con error siempre van al final. */
 export function sortResults(
   results: CalculationResult[],
   sort: SortState,
@@ -189,7 +184,7 @@ export function sortResults(
     if (comparison !== 0) {
       return comparison * sign;
     }
-    // Desempate estable: costo final ascendente y luego el nombre.
+
     const fallbackTotal = a.breakdown.totalUSD - b.breakdown.totalUSD;
     return fallbackTotal !== 0
       ? fallbackTotal
@@ -205,7 +200,6 @@ function formatFeeRule(
     : `${formatUsd(rule.value, 2)} fija`;
 }
 
-/** C. Tabla comparativa: columnas configurables y orden por costo final. */
 export function ComparisonTable({
   results,
   cheapestId,

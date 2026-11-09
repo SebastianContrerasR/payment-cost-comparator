@@ -942,6 +942,10 @@ code {
   .card {
     padding: 15px 16px;
   }
+
+  .table-card {
+    padding: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -950,12 +954,24 @@ code {
   }
 
   .comparison-table tbody td {
-    padding: 9px 10px;
+    padding: 8px 6px;
+  }
+
+  .comparison-table tbody .col-right {
+    font-size: 12px;
   }
 
   .th-sort {
-    padding: 9px 10px;
-    font-size: 10.5px;
+    padding: 8px 5px;
+    font-size: 10px;
+    letter-spacing: 0;
+    gap: 3px;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .sort-indicator:not(.is-active) {
+    display: none;
   }
 
   .table-toolbar {
@@ -1013,5 +1029,20 @@ code {
 
   .breakdown-modal-body {
     padding: 13px 14px calc(15px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 356px) {
+  .comparison-table tbody td {
+    padding: 7px 5px;
+  }
+
+  .comparison-table tbody .col-right {
+    font-size: 11.5px;
+  }
+
+  .th-sort {
+    padding: 7px 4px;
+    font-size: 9.5px;
   }
 }

@@ -114,7 +114,13 @@ y en la leyenda (`legend-dot--*`):
 ### Móvil
 
 - Sin anchos mínimos forzados en la tabla: el scroll solo crece con las
-  columnas visibles.
+  columnas visibles y la tabla debe caber sin scroll horizontal desde
+  344px hacia arriba; por debajo de 344px el scroll interno de la tabla
+  es aceptable. Los ajustes van en dos tramos: compactado general a
+  ≤640px y micro-ajustes extra a ≤356px.
+- El override `.table-card { padding: 0 }` debe declararse después de
+  `.card` dentro de la misma media query, o el padding genérico le roba
+  32px de ancho a la tabla.
 - Paneles flotantes ≤ 640px: hoja inferior fija con scroll interno y
   acciones sticky.
 - Inputs con `font-size: 16px` en móvil (iOS Safari hace auto-zoom

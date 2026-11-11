@@ -100,8 +100,8 @@ y en la leyenda (`legend-dot--*`):
 | identity   | #f7fafd | —       | neutro   |
 | conversion | #e4efff | #2456e6 | #1d4ed8  |
 | fees       | #fdf3df | #b45309 | #92400e  |
-| cashback   | #e2f4ea | #0d7a4d | #065f46  |
-| result     | #1d4ed8 | #163075 | #ffffff  |
+| cashback   | #e2f4ea | #0d7a4d | #065f46  || funding    | #efe9ff | #6d28d9 | #5b21b6  |
+| result     | #1d4ed8 | #163075 | #ffffff |
 
 ### Accesibilidad
 

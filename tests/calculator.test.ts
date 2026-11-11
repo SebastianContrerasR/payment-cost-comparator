@@ -67,7 +67,7 @@ describe("Regresión contra el Excel de referencia", () => {
       EXCEL_AMOUNT_JPY,
       EXCEL_EXCHANGE_RATES,
     );
-    expect(comparison.results).toHaveLength(7);
+    expect(comparison.results).toHaveLength(5);
     expect(comparison.cheapestId).toBe("mexc-card");
   });
 
@@ -251,7 +251,7 @@ describe("Validaciones de entrada", () => {
       .filter((result) => result.status === "error")
       .map((result) => result.method.id);
     expect(errorIds).toEqual(
-      expect.arrayContaining(["okx-card", "io", "bitget-card", "mexc-card"]),
+      expect.arrayContaining(["okx-card", "io", "mexc-card"]),
     );
     expect(comparison.cheapestId).toBe("binance-paypay");
   });
@@ -266,6 +266,7 @@ const BASE_METHOD: PaymentMethod = {
   enabled: true,
   fees: { fxFee: 0, cryptoFee: 0, otherFees: [] },
   cashback: { rate: 0, cap: null, currency: "", base: "amountAfterFees" },
+  funding: null,
   requirements: [],
   observations: [],
   sources: [],

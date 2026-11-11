@@ -1,6 +1,15 @@
 import { useMemo } from "react";
-import type { CalculationResult, OkCalculationResult } from "../../domain/types";
-import { formatPercent, formatRate, formatUsd } from "../../utils/currency";
+import type {
+  CalculationResult,
+  FundingSummary,
+  OkCalculationResult,
+} from "../../domain/types";
+import {
+  formatPen,
+  formatPercent,
+  formatRate,
+  formatUsd,
+} from "../../utils/currency";
 import { ColumnPicker, type ColumnPickerTarget } from "./ColumnPicker";
 
 export type SortDirection = "asc" | "desc";
@@ -19,20 +28,30 @@ export type SortKey =
   | "cashbackCapUSD"
   | "potentialCashbackUSD"
   | "effectiveCashbackUSD"
-  | "totalUSD";
+  | "totalUSD"
+  | "requiredBalance"
+  | "fundingRoute"
+  | "initialPen";
 
 export interface SortState {
   key: SortKey;
   direction: SortDirection;
 }
 
-type ColumnGroup = "identity" | "conversion" | "fees" | "cashback" | "result";
+type ColumnGroup =
+  | "identity"
+  | "conversion"
+  | "fees"
+  | "cashback"
+  | "funding"
+  | "result";
 
 const COLUMN_GROUPS: readonly { id: ColumnGroup; label: string }[] = [
   { id: "identity", label: "Identidad" },
   { id: "conversion", label: "Conversión" },
   { id: "fees", label: "Comisiones" },
   { id: "cashback", label: "Cashback" },
+  { id: "funding", label: "Depósito" },
   { id: "result", label: "Resultado" },
 ];
 
@@ -108,6 +127,27 @@ const COLUMNS: ColumnDef[] = [
     group: "cashback",
   },
   { key: "totalUSD", label: "Total", align: "right", group: "result" },
+  {
+    key: "requiredBalance",
+    label: "Saldo requerido",
+    align: "right",
+    group: "funding",
+    description: "Cripto necesaria antes del cashback",
+  },
+  {
+    key: "fundingRoute",
+    label: "Ruta de fondeo",
+    align: "left",
+    group: "funding",
+    description: "Ruta más económica para conseguir el saldo",
+  },
+  {
+    key: "initialPen",
+    label: "PEN por compra",
+    align: "right",
+    group: "funding",
+    description: "Desembolso por compra en soles, sin descontar el cashback",
+  },
 ];
 
 export const DEFAULT_VISIBLE_COLUMNS: SortKey[] = [
@@ -130,6 +170,7 @@ interface ComparisonTableProps {
   sort: SortState;
   onSortChange: (key: SortKey) => void;
   visibleColumns: readonly SortKey[];
+  funding?: Record<string, FundingSummary>;
   onToggleColumn: (key: SortKey) => void;
   onSelectAllColumns: () => void;
   onResetColumns: () => void;
@@ -142,8 +183,13 @@ function otherFeesTotalUSD(row: OkCalculationResult): number {
   );
 }
 
+type FundingSortKey =
+  | "requiredBalance"
+  | "fundingRoute"
+  | "initialPen";
+
 const SORT_ACCESSORS: Record<
-  SortKey,
+  Exclude<SortKey, FundingSortKey>,
   (row: OkCalculationResult) => number | string
 > = {
   name: (row) => row.method.name.toLowerCase(),
@@ -162,9 +208,35 @@ const SORT_ACCESSORS: Record<
   totalUSD: (row) => row.breakdown.totalUSD,
 };
 
+function networkSummary(summary: FundingSummary): string {
+  const step = summary.steps.find((candidate) => candidate.network !== null);
+  return step && step.network
+    ? `${step.network} · ${formatUsd(step.costAmount, 3)}`
+    : "Interna";
+}
+
+function sortValue(
+  key: SortKey,
+  row: OkCalculationResult,
+  funding: Record<string, FundingSummary>,
+): number | string {
+  const summary = funding[row.method.id];
+  switch (key) {
+    case "requiredBalance":
+      return summary ? summary.targetAmount : Number.POSITIVE_INFINITY;
+    case "fundingRoute":
+      return summary ? summary.routeLabel.toLowerCase() : "~";
+    case "initialPen":
+      return summary ? summary.penPerPurchase : Number.POSITIVE_INFINITY;
+    default:
+      return SORT_ACCESSORS[key](row);
+  }
+}
+
 export function sortResults(
   results: CalculationResult[],
   sort: SortState,
+  funding: Record<string, FundingSummary> = {},
 ): CalculationResult[] {
   const sign = sort.direction === "asc" ? 1 : -1;
   return [...results].sort((a, b) => {
@@ -174,8 +246,8 @@ export function sortResults(
     if (a.status !== "ok" || b.status !== "ok") {
       return 0;
     }
-    const valueA = SORT_ACCESSORS[sort.key](a);
-    const valueB = SORT_ACCESSORS[sort.key](b);
+    const valueA = sortValue(sort.key, a, funding);
+    const valueB = sortValue(sort.key, b, funding);
     let comparison: number;
     if (typeof valueA === "string" || typeof valueB === "string") {
       comparison = String(valueA).localeCompare(String(valueB), "es");
@@ -232,11 +304,15 @@ export function ComparisonTable({
   sort,
   onSortChange,
   visibleColumns,
+  funding = {},
   onToggleColumn,
   onSelectAllColumns,
   onResetColumns,
 }: ComparisonTableProps) {
-  const sortedRows = useMemo(() => sortResults(results, sort), [results, sort]);
+  const sortedRows = useMemo(
+    () => sortResults(results, sort, funding),
+    [results, sort, funding],
+  );
 
   const columns = useMemo(
     () =>
@@ -253,6 +329,7 @@ export function ComparisonTable({
 
   const renderCell = (column: ColumnDef, row: OkCalculationResult) => {
     const { breakdown, method } = row;
+    const summary = funding[method.id];
     switch (column.key) {
       case "name":
         return (
@@ -326,6 +403,27 @@ export function ComparisonTable({
         return formatUsd(breakdown.effectiveCashbackUSD);
       case "totalUSD":
         return <strong>{formatUsd(breakdown.totalUSD)}</strong>;
+      case "requiredBalance":
+        return summary ? (
+          `${formatUsd(summary.targetAmount, 2)} ${summary.targetAsset}`
+        ) : (
+          <span className="cell-muted">—</span>
+        );
+      case "fundingRoute":
+        return summary ? (
+          <div className="cell-name">
+            <span className="funding-cell-route">{summary.routeLabel}</span>
+            <span className="cell-sub">{networkSummary(summary)}</span>
+          </div>
+        ) : (
+          <span className="cell-muted">Sin ruta de fondeo</span>
+        );
+      case "initialPen":
+        return summary ? (
+          formatPen(summary.penPerPurchase)
+        ) : (
+          <span className="cell-muted">—</span>
+        );
     }
   };
 

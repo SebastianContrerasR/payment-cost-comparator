@@ -21,6 +21,8 @@ export interface CashbackConfig {
 
   currency: string;
 
+  timing?: string;
+
   base: CashbackBase;
 }
 
@@ -49,6 +51,7 @@ export interface PaymentMethod {
   enabled: boolean;
   fees: FeesConfig;
   cashback: CashbackConfig;
+  funding: FundingRequirement | null;
   requirements: string[];
   observations: string[];
   sources: PaymentMethodSource[];
@@ -98,4 +101,154 @@ export interface ComparisonResult {
   results: CalculationResult[];
 
   cheapestId: string | null;
+}
+
+export type Asset = "PEN" | "USD" | "USDT" | "USDT0" | "USDC" | "USDG";
+
+export type FundingCostType = "fixed" | "percent";
+
+export type FundingCostMode = "deducted_from_amount" | "charged_on_top";
+
+export interface FundingCost {
+  id: string;
+  label: string;
+  type: FundingCostType;
+  value: number;
+  currency: Asset;
+  mode: FundingCostMode;
+}
+
+export interface FundingSource {
+  id: string;
+  platform: string;
+  label: string;
+  penPerUsdt: number;
+  rateLabel?: string;
+  fee: FundingCost | null;
+  to: string;
+  enabled: boolean;
+  updatedAt?: string;
+  notes?: string[];
+  source?: PaymentMethodSource;
+}
+
+export interface NetworkFee {
+  network: string;
+  networkId: string;
+  asset: "USDT" | "USDT0";
+  depositFee: number;
+  minDeposit: number | null;
+  withdrawFee: number;
+  minWithdraw: number;
+  canDeposit: boolean;
+  canWithdraw: boolean;
+  feeTreatment: FundingCostMode;
+}
+
+export interface PlatformFees {
+  platform: string;
+  label: string;
+  checkedAt: string;
+  source: PaymentMethodSource;
+  networks: NetworkFee[];
+}
+
+export type FundingStepKind = "transfer" | "convert";
+
+export interface FundingStep {
+  id: string;
+  kind: FundingStepKind;
+  label: string;
+  from: string;
+  to: string;
+  network?: "auto" | string;
+  cost?: FundingCost;
+  conversionRate?: number;
+  toAsset?: Asset;
+  enabled?: boolean;
+  notes?: string[];
+  source?: PaymentMethodSource;
+}
+
+export interface FundingRoute {
+  id: string;
+  label: string;
+  sourceId: string;
+  asset?: Asset;
+  steps: FundingStep[];
+  enabled: boolean;
+  notes?: string[];
+}
+
+export interface FundingRequirement {
+  account: string;
+  asset: Asset;
+}
+
+export interface NetworkQuote {
+  network: string;
+  networkId: string;
+  asset: Asset;
+  fee: number;
+  minWithdraw: number;
+  minDeposit: number | null;
+  usable: boolean;
+  reason?: string;
+}
+
+export interface NetworkChoice {
+  network: string;
+  networkId: string;
+  asset: Asset;
+  fee: number;
+  candidates: NetworkQuote[];
+}
+
+export interface FundingStepResult {
+  id: string;
+  label: string;
+  kind: FundingStepKind;
+  from: string;
+  to: string;
+  inputAmount: number;
+  outputAmount: number;
+  costAmount: number;
+  asset: Asset;
+  network: string | null;
+  notes: string[];
+  candidates: NetworkQuote[];
+}
+
+export interface FundingResult {
+  routeId: string;
+  routeLabel: string;
+  sourceId: string;
+  sourceLabel: string;
+  destinationPlatform: string;
+  targetAsset: Asset;
+  targetAmount: number;
+  initialPenRequired: number;
+  acquiredUsdt: number;
+  finalAmountReceived: number;
+  effectivePenPerUnit: number;
+  transferNetwork?: string;
+  transferFee?: number;
+  conversionCosts: number;
+  steps: FundingStepResult[];
+  purchases: number;
+  penPerUsdt: number;
+}
+
+export type FundingCalculation =
+  | { status: "ok"; result: FundingResult }
+  | { status: "error"; routeId: string; reason: string };
+
+export interface FundingSummary extends FundingResult {
+  methodId: string;
+  methodName: string;
+  cashbackAmount: number;
+  cashbackAsset: string;
+  cashbackValuePen: number | null;
+  netEconomicCostPen: number | null;
+  penPerPurchase: number;
 }

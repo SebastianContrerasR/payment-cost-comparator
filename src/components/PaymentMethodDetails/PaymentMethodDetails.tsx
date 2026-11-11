@@ -1,9 +1,87 @@
-import type { PaymentMethod } from "../../domain/types";
-import { formatPercent, formatUsd } from "../../utils/currency";
+import type { FundingSummary, PaymentMethod } from "../../domain/types";
+import {
+  formatPen,
+  formatPercent,
+  formatRate,
+  formatUsd,
+} from "../../utils/currency";
 
 interface PaymentMethodDetailsProps {
   method: PaymentMethod;
+  funding?: FundingSummary | null;
   onOpenBreakdown?: (id: string) => void;
+}
+
+function FundingSection({ method, funding }: PaymentMethodDetailsProps) {
+  if (!method.funding) {
+    return (
+      <section className="details-section">
+        <h3>Fondeo</h3>
+        <p className="cell-muted">
+          No requiere depósito: se paga directo en fiat.
+        </p>
+      </section>
+    );
+  }
+
+  if (!funding) {
+    return (
+      <section className="details-section">
+        <h3>Fondeo</h3>
+        <p className="cell-muted">
+          Sin ruta de depósito configurada para esta cuenta.
+        </p>
+      </section>
+    );
+  }
+
+  const external = funding.steps.find((step) => step.network !== null);
+
+  return (
+    <section className="details-section details-section--funding">
+      <h3>Fondeo</h3>
+      <dl className="info-list">
+        <div className="info-row">
+          <dt>Ruta</dt>
+          <dd>{funding.routeLabel}</dd>
+        </div>
+        <div className="info-row">
+          <dt>Entrada</dt>
+          <dd>
+            {funding.sourceLabel} · {formatRate(funding.penPerUsdt)} S/ por USDT
+          </dd>
+        </div>
+        <div className="info-row">
+          <dt>Saldo requerido</dt>
+          <dd>
+            {formatUsd(funding.targetAmount, 2)} {funding.targetAsset}
+          </dd>
+        </div>
+        <div className="info-row">
+          <dt>Red</dt>
+          <dd>
+            {external && external.network
+              ? `${external.network} · ${formatUsd(external.costAmount, 3)}`
+              : "Sin transferencia externa"}
+          </dd>
+        </div>
+        <div className="info-row">
+          <dt>PEN por compra</dt>
+          <dd>{formatPen(funding.penPerPurchase)}</dd>
+        </div>
+        <div className="info-row">
+          <dt>Cashback esperado</dt>
+          <dd>
+            {formatUsd(funding.cashbackAmount, 2)} {funding.cashbackAsset}
+          </dd>
+        </div>
+        <div className="info-row">
+          <dt>Efectividad</dt>
+          <dd>{formatPercent(funding.effectivePenPerUnit > 0 ? funding.targetAmount * funding.penPerUsdt / funding.initialPenRequired : 0, 1)}</dd>
+        </div>
+      </dl>
+    </section>
+  );
 }
 
 function FeeListItems({ method }: { method: PaymentMethod }) {
@@ -41,9 +119,14 @@ function FeeListItems({ method }: { method: PaymentMethod }) {
   );
 }
 
-export function PaymentMethodDetailsBody({ method }: PaymentMethodDetailsProps) {
+export function PaymentMethodDetailsBody({
+  method,
+  funding,
+}: PaymentMethodDetailsProps) {
   return (
       <div className="details-body">
+        <FundingSection method={method} funding={funding} />
+
         <section className="details-section">
           <h3>Comisiones</h3>
           <dl className="info-list">

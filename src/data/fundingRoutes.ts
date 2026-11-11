@@ -1,0 +1,257 @@
+import type { FundingRoute } from "../domain/types";
+
+const USDT_TO_USDG = 14.231138 / 14.38;
+
+const fundingRoutes: FundingRoute[] = [
+  {
+    id: "binance-p2p-binance",
+    label: "Binance P2P → Binance",
+    sourceId: "binance-p2p",
+    steps: [],
+    enabled: true,
+    notes: ["Sin transferencias: el P2P deja el saldo directamente en Binance."],
+  },
+  {
+    id: "binance-p2p-binance-card",
+    label: "Binance P2P → Binance Card",
+    sourceId: "binance-p2p",
+    steps: [
+      {
+        id: "binance-usdt-usdc",
+        kind: "convert",
+        label: "USDT → USDC",
+        from: "binance:spot",
+        to: "binance:spot",
+        conversionRate: 1,
+        toAsset: "USDC",
+        cost: {
+          id: "binance-usdc-conversion",
+          label: "Conversión incluida en el Crypto Fee",
+          type: "fixed",
+          value: 0,
+          currency: "USDC",
+          mode: "deducted_from_amount",
+        },
+        notes: [
+          "La conversión a USDC es el 0.1% que Binance Card ya cobra como Crypto Fee; contarla aquí la duplicaría.",
+        ],
+      },
+    ],
+    enabled: true,
+  },
+  {
+    id: "okx-p2p-okx-pay",
+    label: "OKX P2P → OKX Pay",
+    sourceId: "okx-p2p",
+    steps: [
+      {
+        id: "okx-usdt-usdg",
+        kind: "convert",
+        label: "USDT → USDG",
+        from: "okx:exchange",
+        to: "okx:exchange",
+        conversionRate: USDT_TO_USDG,
+        toAsset: "USDG",
+        notes: [
+          "Tasa efectiva observada en el registro del 7 de octubre de 2025 (14.38 USDT → 14.231138 USDG).",
+          "No se asume una paridad 1:1 ni un 0.1% fijo: es un valor configurable.",
+        ],
+      },
+      {
+        id: "okx-exchange-pay",
+        kind: "transfer",
+        label: "Exchange → OKX Pay",
+        from: "okx:exchange",
+        to: "okx:pay",
+        toAsset: "USDG",
+        cost: {
+          id: "okx-internal-pay",
+          label: "Transferencia interna",
+          type: "fixed",
+          value: 0,
+          currency: "USDG",
+          mode: "deducted_from_amount",
+        },
+        notes: ["Sin costo según el registro histórico."],
+      },
+    ],
+    enabled: true,
+  },
+  {
+    id: "ligopay-okx-pay",
+    label: "OKX LigoPay → OKX Pay",
+    sourceId: "okx-ligopay",
+    steps: [
+      {
+        id: "ligopay-usdt-usdg",
+        kind: "convert",
+        label: "USDT → USDG",
+        from: "okx:exchange",
+        to: "okx:exchange",
+        conversionRate: USDT_TO_USDG,
+        toAsset: "USDG",
+        notes: [
+          "Reproduce la operación histórica: S/ 50.00 → 14.38 USDT → 14.231138 USDG.",
+        ],
+      },
+      {
+        id: "ligopay-okx-pay",
+        kind: "transfer",
+        label: "Exchange → OKX Pay",
+        from: "okx:exchange",
+        to: "okx:pay",
+        toAsset: "USDG",
+        cost: {
+          id: "ligopay-internal-pay",
+          label: "Transferencia interna",
+          type: "fixed",
+          value: 0,
+          currency: "USDG",
+          mode: "deducted_from_amount",
+        },
+      },
+    ],
+    enabled: true,
+    notes: ["Ruta sin P2P: sirve para comparar la tasa de OKX LigoPay contra las órdenes P2P."],
+  },
+  {
+    id: "binance-p2p-okx-pay",
+    label: "Binance P2P → OKX Pay",
+    sourceId: "binance-p2p",
+    steps: [
+      {
+        id: "binance-okx-transfer",
+        kind: "transfer",
+        label: "Binance → OKX",
+        from: "binance:spot",
+        to: "okx:exchange",
+        network: "auto",
+        notes: ["La red se elige por par: la más barata con activo compatible en ambos extremos."],
+      },
+      {
+        id: "binance-okx-usdt-usdg",
+        kind: "convert",
+        label: "USDT → USDG",
+        from: "okx:exchange",
+        to: "okx:exchange",
+        conversionRate: USDT_TO_USDG,
+        toAsset: "USDG",
+      },
+      {
+        id: "binance-okx-pay",
+        kind: "transfer",
+        label: "Exchange → OKX Pay",
+        from: "okx:exchange",
+        to: "okx:pay",
+        toAsset: "USDG",
+        cost: {
+          id: "binance-okx-internal",
+          label: "Transferencia interna",
+          type: "fixed",
+          value: 0,
+          currency: "USDG",
+          mode: "deducted_from_amount",
+        },
+      },
+    ],
+    enabled: true,
+  },
+  {
+    id: "okx-p2p-binance",
+    label: "OKX P2P → Binance",
+    sourceId: "okx-p2p",
+    steps: [
+      {
+        id: "okx-binance-transfer",
+        kind: "transfer",
+        label: "OKX → Binance",
+        from: "okx:exchange",
+        to: "binance:spot",
+        network: "auto",
+      },
+    ],
+    enabled: true,
+  },
+  {
+    id: "ligopay-binance",
+    label: "OKX LigoPay → Binance",
+    sourceId: "okx-ligopay",
+    steps: [
+      {
+        id: "ligopay-binance-transfer",
+        kind: "transfer",
+        label: "OKX → Binance",
+        from: "okx:exchange",
+        to: "binance:spot",
+        network: "auto",
+      },
+    ],
+    enabled: true,
+  },
+  {
+    id: "binance-p2p-mexc",
+    label: "Binance P2P → MEXC",
+    sourceId: "binance-p2p",
+    steps: [
+      {
+        id: "binance-mexc-transfer",
+        kind: "transfer",
+        label: "Binance → MEXC",
+        from: "binance:spot",
+        to: "mexc:wallet",
+        network: "auto",
+      },
+    ],
+    enabled: true,
+    notes: [
+      "MEXC no tiene depósito fiat directo: el saldo tiene que llegar desde otra plataforma.",
+      "BEP20 es la red barata de este par; TRC20 cuesta unas 200 veces más.",
+    ],
+  },
+  {
+    id: "okx-p2p-mexc",
+    label: "OKX P2P → MEXC",
+    sourceId: "okx-p2p",
+    steps: [
+      {
+        id: "okx-mexc-transfer",
+        kind: "transfer",
+        label: "OKX → MEXC",
+        from: "okx:exchange",
+        to: "mexc:wallet",
+        network: "auto",
+      },
+    ],
+    enabled: true,
+    notes: ["OKX no lista BEP20: para este par la mejor red es Solana."],
+  },
+  {
+    id: "ligopay-mexc",
+    label: "OKX LigoPay → MEXC",
+    sourceId: "okx-ligopay",
+    steps: [
+      {
+        id: "ligopay-mexc-transfer",
+        kind: "transfer",
+        label: "OKX → MEXC",
+        from: "okx:exchange",
+        to: "mexc:wallet",
+        network: "auto",
+      },
+    ],
+    enabled: true,
+  },
+  {
+    id: "io-card-io",
+    label: "Pago de tarjeta IO",
+    sourceId: "io-card",
+    asset: "USD",
+    steps: [],
+    enabled: true,
+    notes: [
+      "Sin transferencia ni conversión: pagas la deuda de la tarjeta en soles.",
+    ],
+  },
+];
+
+export default fundingRoutes;

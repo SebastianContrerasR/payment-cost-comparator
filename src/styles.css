@@ -1081,6 +1081,137 @@ code {
   border: 0;
 }
 
+.funding-card {
+  border-color: #ddd2f7;
+}
+
+.funding-subtitle {
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #5b21b6;
+}
+
+.funding-list,
+.funding-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.funding-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.6fr) minmax(115px, 1fr) minmax(115px, 1fr) auto;
+  gap: 10px 14px;
+  align-items: end;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: #fbfcff;
+}
+
+.funding-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.funding-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.funding-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.funding-field .field-input {
+  padding: 7px 9px;
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.funding-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.funding-alternatives {
+  margin-top: 9px;
+  font-size: 12.5px;
+}
+
+.funding-alternatives summary {
+  cursor: pointer;
+  color: #5b21b6;
+  font-weight: 600;
+}
+
+.funding-error {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--danger);
+}
+
+.funding-missing {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.comparison-table thead th.th-group-funding {
+  background: #efe9ff;
+  box-shadow: inset 0 3px 0 #6d28d9;
+}
+
+.comparison-table thead th.th-group-funding .th-sort {
+  color: #5b21b6;
+}
+
+.comparison-table .th-group-funding .sort-indicator.is-active {
+  color: currentColor;
+}
+
+.legend-dot--funding {
+  background: #efe9ff;
+  border-color: #6d28d9;
+}
+
+.breakdown-row--funding {
+  background: #efe9ff;
+  box-shadow: inset 3px 0 0 #6d28d9;
+}
+
+.breakdown-row--funding .breakdown-value {
+  color: #5b21b6;
+  font-weight: 700;
+}
+
+.funding-breakdown {
+  margin-top: 14px;
+}
+
+.details-section--funding .info-row dd {
+  max-width: 62%;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 880px) {
   .page {
     padding: 20px 14px calc(32px + env(safe-area-inset-bottom, 0px));
@@ -1236,4 +1367,332 @@ code {
   .breakdown-row--total {
     font-size: 11.5px;
   }
+}
+
+@media (max-width: 640px) {
+  .funding-card {
+    padding: 15px 14px;
+  }
+
+  .funding-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .funding-row-main {
+    grid-column: 1 / -1;
+  }
+
+}
+
+.funding-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  background: #fbf9ff;
+}
+
+.funding-table-head,
+.funding-table-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.2fr) minmax(120px, 1fr) minmax(150px, 1.3fr) minmax(80px, 0.7fr) minmax(100px, 0.9fr) minmax(100px, 0.9fr) minmax(100px, 0.9fr) minmax(130px, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 9px 12px;
+}
+
+.funding-table-head {
+  background: #efe9ff;
+  border-bottom: 1px solid #ded3f8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #5b21b6;
+}
+
+.funding-method {
+  border-bottom: 1px solid var(--border);
+}
+
+.funding-method:last-child {
+  border-bottom: 0;
+}
+
+.funding-table-row {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.funding-table-row--credit {
+  background: #fff8e8;
+  box-shadow: inset 3px 0 0 #d19a12;
+}
+
+.funding-table-row--credit > span[data-label="Desembolso"] {
+  color: #8a5c00;
+}
+
+.funding-net-lowest {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.funding-table-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.funding-table-row > span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.funding-summary-extra {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.funding-option-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.funding-option {
+  padding: 8px 10px;
+  border: 1px solid #e4dbfa;
+  border-radius: var(--radius-small);
+  background: #fbf9ff;
+}
+
+.funding-option-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.funding-option p {
+  margin: 2px 0 0;
+}
+
+.funding-network-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+}
+
+.funding-network-select select {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.funding-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.funding-toggle input {
+  margin: 0;
+  accent-color: #6d28d9;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .funding-table-head {
+    display: none;
+  }
+
+  .funding-table-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    padding: 10px 12px;
+  }
+
+  .funding-table-row > span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .funding-table-row > span::before {
+    content: attr(data-label);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .funding-table-row > span[data-label="Destino"],
+  .funding-table-row > span[data-label="Ruta elegida"] {
+    grid-column: 1 / -1;
+  }
+
+  .funding-network-select {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 356px) {
+  .funding-table-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.funding-table-row .cell-sub {
+  display: block;
+  font-weight: 400;
+  white-space: normal;
+}
+
+.funding-discarded {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.funding-discarded summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.funding-discarded ul {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.funding-discarded li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #f6f7fa;
+}
+
+.funding-hint {
+  margin: 12px 0 0;
+  padding: 9px 11px;
+  border-left: 3px solid #6d28d9;
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  background: #f7f4ff;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.funding-hint strong {
+  color: #5b21b6;
+}
+
+@media (max-width: 640px) {
+  .funding-hint {
+    font-size: 12px;
+  }
+}
+
+.funding-table-row--best {
+  background: var(--success-soft);
+  box-shadow: inset 3px 0 0 var(--success);
+}
+
+.funding-table-row--best > span[data-label="Desembolso"] {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.funding-table-row .chip-cheap {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.funding-winner {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-small);
+  background: var(--success-soft);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.funding-winner strong {
+  color: var(--success);
+}
+
+.funding-alternatives {
+  margin: 0 12px 10px;
+  padding: 8px 10px;
+  border-left: 3px solid #ded3f8;
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  background: #fbf9ff;
+  font-size: 12.5px;
+}
+
+.funding-breakdown-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #5b21b6;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.funding-table-row .funding-breakdown-btn {
+  display: block;
+  margin-top: 3px;
+}
+
+.funding-option-actions {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.funding-breakdown-btn:hover,
+.funding-breakdown-btn:focus-visible {
+  color: #4c1d95;
+}
+
+.funding-row--conversion {
+  grid-template-columns: minmax(150px, 1.6fr) minmax(130px, 0.8fr);
 }

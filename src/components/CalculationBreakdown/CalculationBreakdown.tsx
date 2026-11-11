@@ -5,7 +5,7 @@ interface CalculationBreakdownProps {
   result: OkCalculationResult;
 }
 
-type BreakdownGroup = "conversion" | "fees" | "cashback" | "result";
+type BreakdownGroup = "conversion" | "fees" | "cashback" | "funding" | "result";
 
 interface BreakdownRowProps {
   label: string;
@@ -14,7 +14,7 @@ interface BreakdownRowProps {
   variant?: "default" | "divider" | "total";
 }
 
-function BreakdownRow({
+export function BreakdownRow({
   label,
   value,
   group,

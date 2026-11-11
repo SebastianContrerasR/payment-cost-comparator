@@ -29,6 +29,13 @@ export function formatPercent(fraction: number, decimals = 2): string {
   }).format(fraction * 100)}%`;
 }
 
+export function formatPen(value: number, decimals = 2): string {
+  return `S/ ${new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value)}`;
+}
+
 export function formatRate(value: number, maxDecimals = 8): string {
   const fixed = value.toFixed(maxDecimals);
   const trimmed = fixed.replace(/\.?0+$/, "");

@@ -1,14 +1,16 @@
-import type { CalculationResult } from "../../domain/types";
+import type { CalculationResult, FundingSummary } from "../../domain/types";
 import { PaymentMethodDetailsBody } from "../PaymentMethodDetails/PaymentMethodDetails";
 
 interface PaymentMethodPanelProps {
   result: CalculationResult;
+  funding?: FundingSummary;
   isCheapest?: boolean;
   onClose: () => void;
 }
 
 export function PaymentMethodPanel({
   result,
+  funding,
   isCheapest = false,
   onClose,
 }: PaymentMethodPanelProps) {
@@ -53,7 +55,11 @@ export function PaymentMethodPanel({
       </div>
 
       <div className="panel-details">
-        <PaymentMethodDetailsBody method={method} onOpenBreakdown={undefined} />
+        <PaymentMethodDetailsBody
+          method={method}
+          funding={funding}
+          onOpenBreakdown={undefined}
+        />
       </div>
     </article>
   );

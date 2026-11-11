@@ -3,14 +3,17 @@ import ComparisonTable, {
   type SortKey,
   type SortState,
 } from "./components/ComparisonTable/ComparisonTable";
+import FundingPanel from "./components/FundingPanel/FundingPanel";
 import InputPanel from "./components/InputPanel/InputPanel";
 import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
 import PaymentMethodPanel from "./components/PaymentMethodPanel/PaymentMethodPanel";
 import paymentMethods from "./data/paymentMethods";
-import type { ExchangeRateInput } from "./domain/types";
+import { isOkResult } from "./domain/calculator";
+import type { ExchangeRateInput, OkCalculationResult } from "./domain/types";
 import { useComparison } from "./hooks/useComparison";
+import { useFunding } from "./hooks/useFunding";
 import { useVisibleColumns } from "./hooks/useVisibleColumns";
-import { formatUsd } from "./utils/currency";
+import { formatPen, formatUsd } from "./utils/currency";
 
 const DEFAULT_AMOUNT_JPY = 50_000;
 
@@ -49,16 +52,54 @@ export default function App() {
     amountJPY,
     exchangeRates,
   );
+  const funding = useFunding(results);
 
-  const cheapestResult = useMemo(
+  const bestResult = useMemo<OkCalculationResult | undefined>(
     () =>
-      cheapestId === null
-        ? undefined
-        : results.find(
-            (result) => result.status === "ok" && result.method.id === cheapestId,
-          ),
-    [results, cheapestId],
+      results.filter(isOkResult).reduce<OkCalculationResult | undefined>(
+        (best, current) => {
+          if (!best) {
+            return current;
+          }
+          return current.breakdown.totalUSD < best.breakdown.totalUSD
+            ? current
+            : best;
+        },
+        undefined,
+      ),
+    [results],
   );
+
+  const penBest = useMemo(() => {
+    const candidates: Array<{
+      result: OkCalculationResult;
+      pen: number;
+      cashback: string | null;
+    }> = [];
+    for (const result of results.filter(isOkResult)) {
+      const summary = funding.byMethodId[result.method.id];
+      if (!summary || !Number.isFinite(summary.penPerPurchase)) {
+        continue;
+      }
+      candidates.push({
+        result,
+        pen: summary.penPerPurchase,
+        cashback:
+          summary.cashbackAmount > 0
+            ? `${formatUsd(summary.cashbackAmount, 2)} ${summary.cashbackAsset}`
+            : null,
+      });
+    }
+    if (candidates.length === 0) {
+      return undefined;
+    }
+    return candidates.reduce((best, current) =>
+      current.pen < best.pen ? current : best,
+    );
+  }, [results, funding.byMethodId]);
+
+  const bestId =
+    (penBest ? penBest.result.method.id : bestResult?.method.id) ?? cheapestId;
 
   const selectedResult = useMemo(
     () =>
@@ -146,17 +187,33 @@ export default function App() {
           onExchangeRateChange={handleExchangeRateChange}
         />
 
-        {cheapestResult && cheapestResult.status === "ok" ? (
+        <FundingPanel model={funding} />
+
+        {penBest ? (
           <section className="summary-banner" role="status">
-            El método más económico es{" "}
-            <strong>{cheapestResult.method.name}</strong> con un costo total de{" "}
-            <strong>{formatUsd(cheapestResult.breakdown.totalUSD)}</strong>.
+            El método con menor desembolso es{" "}
+            <strong>{penBest.result.method.name}</strong> con{" "}
+            <strong>{formatPen(penBest.pen)}</strong> por compra.
+            {penBest.cashback ? (
+              <>
+                {" "}
+                Cashback estimado: <strong>{penBest.cashback}</strong>, para la
+                siguiente compra.
+              </>
+            ) : null}
+          </section>
+        ) : bestResult ? (
+          <section className="summary-banner" role="status">
+            El método más económico es <strong>{bestResult.method.name}</strong>{" "}
+            con un costo total de{" "}
+            <strong>{formatUsd(bestResult.breakdown.totalUSD)}</strong>.
           </section>
         ) : null}
 
         <ComparisonTable
           results={results}
-          cheapestId={cheapestId}
+          cheapestId={bestId}
+          funding={funding.byMethodId}
           selectedId={selectedId}
           onSelect={handleSelect}
           onOpenBreakdown={handleOpenBreakdown}
@@ -171,7 +228,8 @@ export default function App() {
         {selectedResult ? (
           <PaymentMethodPanel
             result={selectedResult}
-            isCheapest={selectedResult.method.id === cheapestId}
+            funding={funding.byMethodId[selectedResult.method.id]}
+            isCheapest={selectedResult.method.id === bestId}
             onClose={handleClosePanel}
           />
         ) : (
@@ -181,7 +239,15 @@ export default function App() {
           </p>
         )}
 
-        <BreakdownModal result={breakdownResult} onClose={closeBreakdown} />
+        <BreakdownModal
+          result={breakdownResult}
+          funding={
+            breakdownResult && breakdownResult.status === "ok"
+              ? funding.byMethodId[breakdownResult.method.id]
+              : undefined
+          }
+          onClose={closeBreakdown}
+        />
       </main>
 
       <footer className="app-footer">

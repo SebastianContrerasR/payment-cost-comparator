@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
-import type { CalculationResult } from "../../domain/types";
+import type { CalculationResult, FundingSummary } from "../../domain/types";
 import CalculationBreakdown from "../CalculationBreakdown/CalculationBreakdown";
+import FundingBreakdown from "../FundingBreakdown/FundingBreakdown";
 
 interface BreakdownModalProps {
   result: CalculationResult | undefined;
+  funding?: FundingSummary;
   onClose: () => void;
 }
 
-export function BreakdownModal({ result, onClose }: BreakdownModalProps) {
+export function BreakdownModal({ result, funding, onClose }: BreakdownModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -61,7 +63,10 @@ export function BreakdownModal({ result, onClose }: BreakdownModalProps) {
         </div>
         <div className="breakdown-modal-body">
           {result.status === "ok" ? (
-            <CalculationBreakdown result={result} />
+            <>
+              <CalculationBreakdown result={result} />
+              {funding ? <FundingBreakdown summary={funding} /> : null}
+            </>
           ) : (
             <p className="breakdown-modal-status" role="alert">
               No se puede calcular con los valores actuales: {result.reason}

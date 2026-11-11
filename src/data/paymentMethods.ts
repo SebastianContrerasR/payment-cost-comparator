@@ -19,6 +19,7 @@ const paymentMethods: PaymentMethod[] = [
       currency: "",
       base: "amountAfterFees",
     },
+    funding: { account: "binance:spot", asset: "USDT" },
     requirements: [
       "Disponible únicamente en Japón.",
       "Utilizable solo en tiendas que acepten PayPay (que muestren el icono de PayPay).",
@@ -51,8 +52,10 @@ const paymentMethods: PaymentMethod[] = [
       rate: 0.02,
       cap: 5,
       currency: "USDG",
+      timing: "Aproximadamente 1 día después del pago",
       base: "amountAfterFees",
     },
+    funding: { account: "okx:pay", asset: "USDG" },
     requirements: [
       "Utilizar USDG para realizar las compras.",
       "Convertir previamente los fondos a USDG.",
@@ -101,8 +104,10 @@ const paymentMethods: PaymentMethod[] = [
       rate: 0.02,
       cap: 100,
       currency: "",
+      timing: "Según las condiciones vigentes",
       base: "amountAfterFees",
     },
+    funding: { account: "binance:spot", asset: "USDC" },
     requirements: [
       "Pagar con USDC para aplicar la comisión de conversión preferencial de 0.1%.",
       "Mantener un gasto mensual mínimo de 100 USD para calificar al nivel de cashback esperado (Nivel 2).",
@@ -130,7 +135,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "Bybit",
     network: "Mastercard",
     exchangeRateKey: "mastercard",
-    enabled: true,
+    enabled: false,
     fees: {
       fxFee: 0.02,
 
@@ -141,8 +146,10 @@ const paymentMethods: PaymentMethod[] = [
       rate: 0.02,
       cap: 5,
       currency: "USDT",
+      timing: "Según las condiciones vigentes",
       base: "amountAfterFees",
     },
+    funding: { account: "bybit:wallet", asset: "USDT" },
     requirements: [
       "Convertir los fondos mediante Bybit One-Click Sell antes de la compra.",
       "La conversión mínima es de 1 USD.",
@@ -182,13 +189,16 @@ const paymentMethods: PaymentMethod[] = [
     cashback: {
       rate: 0.01,
       cap: null,
-      currency: "",
+      currency: "USD",
+      timing: "Se abona al saldo de la tarjeta al comprar",
       base: "amountAfterFees",
     },
+    funding: { account: "io:card", asset: "USD" },
     requirements: [],
     observations: [
       "La comisión por conversión de moneda (3%) aplica cuando la transacción se realiza en una moneda distinta del sol peruano o del dólar americano.",
       "Cashback de 1% con límite ilimitado, disponible para nuestro perfil.",
+      "El cashback se abona a la deuda de la tarjeta; el costo neto de la tabla de rutas lo descuenta.",
       "El seguro de desgravamen (0.3% sobre el saldo deudor promedio, máximo S/ 20 mensuales) aplica al saldo de la tarjeta y no forma parte del cálculo de la compra.",
       "Única tarjeta tradicional del comparador: no requiere convertir criptomonedas.",
     ],
@@ -213,7 +223,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "Bitget",
     network: "Visa",
     exchangeRateKey: "visa",
-    enabled: true,
+    enabled: false,
     fees: {
       fxFee: 0.01,
       cryptoFee: 0.009,
@@ -224,8 +234,10 @@ const paymentMethods: PaymentMethod[] = [
       rate: 0.03,
       cap: 6,
       currency: "",
+      timing: "Según las condiciones vigentes",
       base: "amountAfterFees",
     },
+    funding: { account: "bitget:wallet", asset: "USDT" },
     requirements: [
       "Gastar más de 100 USD al mes para alcanzar el cashback del 3%; el cashback base es 2%.",
     ],
@@ -271,8 +283,10 @@ const paymentMethods: PaymentMethod[] = [
       rate: 0.04,
       cap: 100,
       currency: "USDT",
+      timing: "Durante el mes siguiente",
       base: "amountAfterFees",
     },
+    funding: { account: "mexc:wallet", asset: "USDT" },
     requirements: [
       "Mantener el nivel Standard (M-Score entre 350 y 599) para acceder al cashback del 4%.",
     ],

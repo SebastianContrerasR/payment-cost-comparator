@@ -2,8 +2,12 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import App from "../src/App";
 import BreakdownModal from "../src/components/BreakdownModal/BreakdownModal";
+import FundingRouteBreakdown from "../src/components/FundingRouteBreakdown/FundingRouteBreakdown";
 import { calculateMethod } from "../src/domain/calculator";
+import { calculateFunding } from "../src/domain/funding";
 import paymentMethods from "../src/data/paymentMethods";
+import fundingRoutes from "../src/data/fundingRoutes";
+import fundingSources from "../src/data/fundingSources";
 
 const html = renderToString(<App />);
 
@@ -22,19 +26,21 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("157.71524839");
   });
 
-  it("muestra los siete métodos en la tabla", () => {
+  it("muestra solo los métodos habilitados en la tabla", () => {
     expect(html).toContain("Binance PayPay");
     expect(html).toContain("OKX Card");
     expect(html).toContain("Binance Card");
-    expect(html).toContain("Bybit Card");
     expect(html).toContain(">IO<");
-    expect(html).toContain("Bitget Card");
     expect(html).toContain("MEXC Card");
+
+    expect(html).not.toContain("Bybit Card");
+    expect(html).not.toContain("Bitget Card");
   });
 
-  it("marca MEXC Card como el método más barato con el escenario por defecto", () => {
-    expect(html).toContain("El método más económico es");
-    expect(html).toContain("MEXC Card");
+  it("elige al ganador por desembolso en soles con el escenario por defecto", () => {
+    expect(html).toContain("menor desembolso");
+    expect(html).toContain("Binance PayPay");
+    expect(html).toContain("S/ 1,198.63");
     expect(html).toContain("$307.3994");
 
     expect(html).toContain("Más barato");
@@ -68,11 +74,92 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Resultado");
   });
 
+  it("no filtra valores inválidos en el render inicial", () => {
+    expect(html).not.toContain("NaN");
+    expect(html).not.toContain("Infinity");
+  });
+
+  it("muestra el fondeo con fuentes, mejor ruta y saldos", () => {
+    expect(html).toContain("Fondeo");
+    expect(html).toContain("Fuentes de adquisición");
+    expect(html).toContain("Mejor ruta de fondeo");
+    expect(html).toContain("Desembolso");
+    expect(html).toContain("funding-table-row--best");
+    expect(html).toContain("Más barato:");
+    expect(html).toContain("Rutas alternativas y redes · OKX Card");
+    expect(html).toContain("planes B de esa misma fila");
+    expect(html).toContain("Ver desglose");
+    expect(html).toContain("Conversiones de activo");
+    expect(html).toContain("Tipo de cambio efectivo");
+    expect(html).toContain("USDG por USDT");
+    expect(html).toContain("USDC por USDT");
+    expect(html).not.toContain(
+      "La ruta entrega USDT pero el método requiere USDC",
+    );
+    expect(html).toContain("Redes descartadas");
+    expect(html).not.toContain("Compras que cubre el depósito");
+    expect(html).not.toContain("PEN netos");
+    expect(html).not.toContain("Costo neto S/");
+    expect(html).not.toContain(
+      "La ruta entrega USDC pero el método requiere USDT",
+    );
+    expect(html).toContain("Pago de tarjeta IO");
+    expect(html).toContain("funding-table-row--credit");
+    expect(html).toContain("Costo neto");
+    expect(html).toContain("funding-net-lowest");
+    expect(html.indexOf("Ver desglose de la ruta de IO")).toBeGreaterThan(
+      html.indexOf("Ver desglose de la ruta de MEXC Card"),
+    );
+    expect(html).toContain("326.55");
+    expect(html).not.toContain("Sin ruta de fondeo disponible");
+    expect(html).not.toContain("Tasa de mercado");
+    expect(html).not.toContain("Sobrecosto vs mercado");
+    expect(html).not.toContain("cuánto debería costar 1 USDT sin");
+    expect(html).toContain("no lista BEP20");
+  });
+
   it("no muestra el detalle por defecto: se abre al seleccionar", () => {
     expect(html).toContain("$317.0271");
     expect(html).toContain("Selecciona un método de la tabla para ver");
     expect(html).not.toContain("breakdown-modal");
     expect(html).not.toContain("Requisitos");
+  });
+});
+
+describe("FundingRouteBreakdown (render SSR)", () => {
+  const route = fundingRoutes.find(
+    (candidate) => candidate.id === "binance-p2p-mexc",
+  );
+  const source = fundingSources.find(
+    (candidate) => candidate.id === route?.sourceId,
+  );
+  if (!route || !source) {
+    throw new Error("La ruta binance-p2p-mexc y su fuente deben existir.");
+  }
+  const fundingCalculation = calculateFunding({
+    route,
+    source,
+    targetAmount: 100,
+    targetAsset: "USDT",
+    penPerUsdt: 3.78,
+  });
+  const routeHtml = renderToString(
+    <FundingRouteBreakdown
+      methodName="MEXC Card"
+      routeLabel={route.label}
+      calculation={fundingCalculation}
+      onClose={() => {}}
+    />,
+  );
+
+  it("muestra la cadena desde el depósito en soles hasta el saldo requerido", () => {
+    expect(routeHtml).toContain("Desglose del fondeo");
+    expect(routeHtml).toContain("Depósito en soles");
+    expect(routeHtml).toContain("Comisión de la orden P2P");
+    expect(routeHtml).toContain("BEP20");
+    expect(routeHtml).toContain("Llega al destino");
+    expect(routeHtml).toContain("Saldo requerido por compra");
+    expect(routeHtml).toContain("100.000000 USDT");
   });
 });
 

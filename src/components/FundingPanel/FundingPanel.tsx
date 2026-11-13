@@ -490,6 +490,8 @@ export function FundingPanel({ model }: FundingPanelProps) {
           </div>
         ))}
       </div>
+        </>
+      )}
 
       <h3 className="funding-subtitle">Mejor ruta de fondeo</h3>
       {winner && winner.best ? (
@@ -597,8 +599,6 @@ export function FundingPanel({ model }: FundingPanelProps) {
         Las redes y sus comisiones se actualizan en{" "}
         <code>src/data/fundingNetworks.ts</code>.
       </p>
-        </>
-      )}
 
       {routeBreakdown ? (
         <FundingRouteBreakdown

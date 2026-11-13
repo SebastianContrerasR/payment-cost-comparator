@@ -174,6 +174,9 @@ y en la leyenda (`legend-dot--*`):
   JSON serializa sus inputs y cada cambio válido se aplica al instante;
   los errores se muestran sin tocar el estado
   (`aria-invalid`, `role="alert"`, badge de validez).
+- El editor JSON reemplaza solo las secciones de input del card; el
+  resto del contenido (tablas de resultados, resúmenes) sigue visible
+  en modo JSON.
 - El JSON cubre exactamente los inputs visibles del card, nada más:
   valores que no se editan en la UI no van en el JSON, y aplicar el JSON
   preserva el resto del estado. En cards que mezclan configuración y

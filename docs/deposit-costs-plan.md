@@ -2,7 +2,7 @@
 
 **Estado:** implementado (F1–F7).
 
-Código: `src/domain/funding.ts` (motor, costos y resolución de redes), `src/data/fundingNetworks.ts` (43 tarifas con `networkId`, compatibilidad y `checkedAt`), `src/data/fundingSources.ts`, `src/data/fundingRoutes.ts`, `src/hooks/useFunding.ts` (persistencia y optimizador) y `src/components/FundingPanel/` + `src/components/FundingBreakdown/`.
+Código: `src/domain/funding.ts` (motor, costos y resolución de redes), `src/data/fundingNetworks.ts` (43 tarifas con `networkId`, compatibilidad y `checkedAt`), `src/data/fundingSources.ts`, `src/data/fundingRoutes.ts`, `src/hooks/useFunding.ts` (persistencia y optimizador), `src/components/FundingInputs/` + `src/components/FundingResults/` + `src/components/FundingBreakdown/`.
 
 Desviaciones conocidas:
 

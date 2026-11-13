@@ -3,7 +3,7 @@ import { defaultConversionRates } from "../src/domain/funding";
 import {
   parseFundingJson,
   serializeFundingJson,
-} from "../src/components/FundingPanel/fundingJson";
+} from "../src/components/FundingInputs/fundingJson";
 import { readFundingSettings } from "../src/hooks/useFunding";
 import type { FundingSettings } from "../src/hooks/useFunding";
 

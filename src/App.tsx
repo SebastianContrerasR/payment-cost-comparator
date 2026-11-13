@@ -3,7 +3,8 @@ import ComparisonTable, {
   type SortKey,
   type SortState,
 } from "./components/ComparisonTable/ComparisonTable";
-import FundingPanel from "./components/FundingPanel/FundingPanel";
+import FundingInputs from "./components/FundingInputs/FundingInputs";
+import FundingResults from "./components/FundingResults/FundingResults";
 import InputPanel from "./components/InputPanel/InputPanel";
 import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
 import PaymentMethodPanel from "./components/PaymentMethodPanel/PaymentMethodPanel";
@@ -217,7 +218,7 @@ export default function App() {
           onApplyMethods={setActiveMethods}
         />
 
-        <FundingPanel model={funding} />
+        <FundingInputs model={funding} />
 
         {penBest ? (
           <section className="summary-banner" role="status">
@@ -239,6 +240,8 @@ export default function App() {
             <strong>{formatUsd(bestResult.breakdown.totalUSD)}</strong>.
           </section>
         ) : null}
+
+        <FundingResults model={funding} />
 
         <ComparisonTable
           purchaseCurrency={currency}

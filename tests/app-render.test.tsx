@@ -137,6 +137,17 @@ describe("App (renderizado inicial)", () => {
     expect(html).not.toContain("Sobrecosto vs mercado");
     expect(html).not.toContain("cuánto debería costar 1 USDT sin");
     expect(html).toContain("no lista BEP20");
+    expect(html.indexOf("Fuentes de adquisición")).toBeLessThan(
+      html.indexOf("El método con menor desembolso es"),
+    );
+    expect(
+      html.indexOf('aria-label="Mejor ruta de fondeo por método de pago"'),
+    ).toBeGreaterThan(
+      html.indexOf("El método con menor desembolso es"),
+    );
+    expect(
+      html.indexOf('aria-label="Mejor ruta de fondeo por método de pago"'),
+    ).toBeLessThan(html.indexOf('aria-label="Tabla comparativa"'));
   });
 
   it("no muestra el detalle por defecto: se abre al seleccionar", () => {

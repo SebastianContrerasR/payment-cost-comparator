@@ -184,7 +184,7 @@ y en la leyenda (`legend-dot--*`):
   (Fuentes de adquisición y Conversiones de activo); la tabla de rutas
   y sus selects de red no entran en el JSON.
 - La serialización y validación viven en un `json.ts` junto al
-  componente: `InputPanel/inputJson.ts` y `FundingPanel/fundingJson.ts`.
+  componente: `InputPanel/inputJson.ts` y `FundingInputs/fundingJson.ts`.
 - El parseo es estricto: JSON malformado, tipos inválidos, IDs o claves
   desconocidas y claves faltantes devuelven error visible. Nunca se
   aplica un estado parcial ni se inventan defaults silenciosos.

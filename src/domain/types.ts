@@ -125,7 +125,14 @@ export interface ComparisonResult {
   cheapestId: string | null;
 }
 
-export type Asset = "PEN" | "USD" | "USDT" | "USDT0" | "USDC" | "USDG";
+export type Asset =
+  | "PEN"
+  | "USD"
+  | "USDT"
+  | "USDT0"
+  | "USDC"
+  | "USDG"
+  | "U";
 
 export type FundingCostType = "fixed" | "percent";
 

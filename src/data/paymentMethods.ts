@@ -202,6 +202,52 @@ const paymentMethods: PaymentMethod[] = [
     ],
   },
   {
+    id: "binance-card-u",
+    name: "Binance Card (U)",
+    provider: "Binance",
+    network: "Mastercard",
+    exchangeRateKey: "mastercard",
+    supportedCurrencies: ["JPY", "USD"],
+    enabled: true,
+    fees: {
+      fxFee: 0,
+      cryptoFee: 0,
+      otherFees: [],
+    },
+    cashback: {
+      rate: 0.02,
+      cap: null,
+      tiers: BINANCE_CASHBACK_TIERS,
+      currency: "",
+      timing: "Según las condiciones vigentes",
+      base: "amountAfterFees",
+    },
+    funding: { account: "binance:spot", asset: "U" },
+    requirements: [
+      "Tener saldo en U y comprobar que la cuenta sea elegible en la orden de prioridad de pago de Binance.",
+      "Pagar con U para aplicar las tarifas especiales de la tarjeta.",
+      "El nivel de cashback se estima con el monto de compra convertido a USD.",
+    ],
+    observations: [
+      "U está disponible solo en determinados países; la orden de prioridad de pago indica si puede agregarse como opción.",
+      "Tarifas especiales de U: 0% de comisión por cambio de divisa y 0% de comisión por conversión de criptomonedas.",
+      "Si se cobra comisión por cambio de divisa, Binance la reembolsa inmediatamente según la cantidad de U utilizada; el reembolso se abona en USDC a la cuenta de fondeo.",
+      "El escenario asume un pago 100% con U, por lo que las comisiones de la tarjeta quedan en 0%.",
+      "Cashback por niveles: Nivel 1 (menos de 100 USD): 1.5%; Nivel 2 (100 a menos de 1,000 USD): 2%; Nivel 3 (1,000 USD o más): 3%.",
+      "El Nivel 3 tiene un límite mensual equivalente a 100 USD; los niveles 1 y 2 no tienen límite.",
+    ],
+    sources: [
+      {
+        label: "Comisiones de Binance Card",
+        url: "https://www.binance.com/es-LA/support/faq/detail/f34b3138d61a4f79b594bb7290ac09b3",
+      },
+      {
+        label: "Binance Card Cashback",
+        url: "https://www.binance.com/es-LA/support/faq/detail/48e903b7cc8841e293bfd2486be4d025",
+      },
+    ],
+  },
+  {
     id: "bybit-card",
     name: "Bybit Card",
     provider: "Bybit",

@@ -61,6 +61,9 @@ MEXC Card es el método más barato en este escenario, y por eso la última suit
 también verifica el banner "más económico" de la interfaz. La variante **Binance
 Card (USDT)** no forma parte del Excel; con los mismos valores de referencia su
 total es **320.1688 USD** en JPY 50 000 y **494.41 USD** en una compra de 500 USD.
+La variante **Binance Card (U)** tampoco forma parte del Excel: con las tarifas
+especiales del token U (FX 0% y conversión 0%) su total es **311.0912 USD** en
+JPY 50 000 y **490 USD** en una compra de 500 USD.
 
 ### Cashback por niveles de Binance Card
 
@@ -72,7 +75,7 @@ El monto de compra convertido a USD selecciona el nivel:
 | Nivel 2 | 100 a menos de 1,000 USD | 2.0% | Sin límite |
 | Nivel 3 | 1,000 USD o más | 3.0% | 100 USD |
 
-Aplica igual a las variantes USDC y USDT. El nivel se recalcula al cambiar el
+Aplica igual a las variantes USDC, USDT y U. El nivel se recalcula al cambiar el
 monto de compra.
 
 ### Supuestos del escenario documentados en la configuración
@@ -80,6 +83,11 @@ monto de compra.
 - **Binance Card (USDC):** se usa la conversión de **0.1%**, la tarifa
   preferencial por pagar con USDC. La variante **USDT** usa la comisión general
   de **0.9%**. Ambas comparten FX Fee del 2% en compras con conversión de divisa.
+- **Binance Card (U):** FX Fee y comisión de conversión en **0%** por las
+  tarifas especiales del token U; si la operación cobra comisión de cambio,
+  Binance la reembolsa en USDC según la cantidad de U utilizada. U solo está
+  disponible en determinados países (se verifica en la orden de prioridad de
+  pago) y el fondeo asume paridad 1 U = 1 USDT.
 - **Bybit Card:** la conversión de criptomonedas (**0.9%**) y el FX Padding
   (**1%**) se combinan de forma aditiva (1.9%) y se aplican como un único
   multiplicador tras el FX Fee, igual que en el Excel.

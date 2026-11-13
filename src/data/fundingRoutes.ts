@@ -40,6 +40,35 @@ const fundingRoutes: FundingRoute[] = [
     enabled: true,
   },
   {
+    id: "binance-p2p-binance-card-u",
+    label: "Binance P2P → Binance Card (U)",
+    sourceId: "binance-p2p",
+    steps: [
+      {
+        id: "binance-usdt-u",
+        kind: "convert",
+        label: "USDT → U",
+        from: "binance:spot",
+        to: "binance:spot",
+        conversionRate: 1,
+        toAsset: "U",
+        cost: {
+          id: "binance-u-conversion",
+          label: "Conversión a U",
+          type: "fixed",
+          value: 0,
+          currency: "U",
+          mode: "deducted_from_amount",
+        },
+        notes: [
+          "Se asume paridad 1 U = 1 USDT; ajusta la tasa en Fondeo → Conversiones de activo si Binance aplica un spread.",
+          "La tarjeta no cobra comisión por convertir U a moneda fiat.",
+        ],
+      },
+    ],
+    enabled: true,
+  },
+  {
     id: "okx-p2p-okx-pay",
     label: "OKX P2P → OKX Pay",
     sourceId: "okx-p2p",

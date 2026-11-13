@@ -70,9 +70,11 @@ Reglas de compra:
   rango de cashback cuando el método declara `cashback.tiers`. Sin
   tiers se usa `rate` y `cap`; el nivel no altera la base ni las
   comisiones.
-- Binance Card se declara como dos métodos según el activo de pago:
-  `binance-card` (USDC, crypto fee 0.1%) y `binance-card-usdt` (USDT,
-  crypto fee 0.9%). Comparten red, FX y rangos de cashback.
+- Binance Card se declara como tres métodos según el activo de pago:
+  `binance-card` (USDC, crypto fee 0.1%), `binance-card-usdt` (USDT,
+  crypto fee 0.9%) y `binance-card-u` (U, FX fee 0% y crypto fee 0%
+  por las tarifas especiales del token U). Comparten red y rangos de
+  cashback; su fondeo es la ruta `binance-p2p-binance-card-u`.
 - Cashback de Binance: Nivel 1 (<100 USD) 1.5% sin límite; Nivel 2
   (100 a <1,000 USD) 2% sin límite; Nivel 3 (≥1,000 USD) 3% con límite
   de 100 USD.

@@ -46,7 +46,7 @@
 
 ## 3. Binance Card
 
-La tarjeta tiene dos variantes según el activo con el que se paga. Comparten red, FX Fee y cashback; cambia la comisión de conversión.
+La tarjeta tiene tres variantes según el activo con el que se paga. Comparten red y cashback; cambian las comisiones.
 
 ### 3.1 Binance Card (USDC)
 
@@ -82,6 +82,29 @@ La tarjeta tiene dos variantes según el activo con el que se paga. Comparten re
 **Cashback por niveles**
 
 Aplica la misma tabla de niveles que la variante USDC: 1.5%, 2.0% y 3.0%, con el límite de 100 USD en el Nivel 3.
+
+**Documentación**
+- [Comisiones de Binance Card](https://www.binance.com/es-LA/support/faq/detail/f34b3138d61a4f79b594bb7290ac09b3)
+- [Binance Card Cashback](https://www.binance.com/es-LA/support/faq/detail/48e903b7cc8841e293bfd2486be4d025)
+
+### 3.3 Binance Card (U)
+
+**Disponibilidad**
+- El token U es compatible con determinados países: hay que revisar la orden de prioridad de pago de Binance para verificar si puede agregarse como opción de pago.
+- El escenario asume un pago 100% con U.
+
+**Comisiones**
+- Red de pago: Mastercard.
+- FX Fee: 0% al pagar con U.
+- Comisión por conversión de criptomonedas: 0% al pagar con U.
+- Si la operación cobra comisión por cambio de divisa, Binance la reembolsa inmediatamente según la cantidad de U utilizada (por ejemplo, con 50% de U y 50% de USDT se devuelve la mitad de la comisión). El reembolso se abona en USDC a la cuenta de fondeo.
+
+**Cashback por niveles**
+
+Aplica la misma tabla de niveles que las variantes USDC y USDT: 1.5%, 2.0% y 3.0%, con el límite de 100 USD en el Nivel 3.
+
+**Fondeo**
+- Ruta: Binance P2P → Binance Card (U), con conversión USDT → U a paridad 1:1 y sin costo de conversión.
 
 **Documentación**
 - [Comisiones de Binance Card](https://www.binance.com/es-LA/support/faq/detail/f34b3138d61a4f79b594bb7290ac09b3)

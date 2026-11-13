@@ -59,6 +59,7 @@ describe("Regresión contra el Excel de referencia", () => {
       "okx-card",
       "binance-card",
       "binance-card-usdt",
+      "binance-card-u",
       "bybit-card",
       "io",
       "bitget-card",
@@ -72,7 +73,7 @@ describe("Regresión contra el Excel de referencia", () => {
       { currency: "JPY", amount: EXCEL_AMOUNT_JPY },
       EXCEL_EXCHANGE_RATES,
     );
-    expect(comparison.results).toHaveLength(6);
+    expect(comparison.results).toHaveLength(7);
     expect(comparison.cheapestId).toBe("mexc-card");
   });
 
@@ -212,6 +213,54 @@ describe("Pasos intermedios del Excel", () => {
   });
 });
 
+describe("Binance Card (U): tarifas especiales del token U", () => {
+  it("aplica FX 0%, conversión 0% y cashback del Nivel 2 en JPY 50 000", () => {
+    const result = calculateOk(
+      methodById("binance-card-u"),
+      EXCEL_AMOUNT_JPY,
+      EXCEL_EXCHANGE_RATES,
+    );
+    const { breakdown } = result;
+    expect(breakdown.exchangeRate).toBe(157.51008064);
+    expect(breakdown.baseAmountUSD).toBeCloseTo(317.44, 4);
+    expect(breakdown.afterFxUSD).toBeCloseTo(317.44, 4);
+    expect(breakdown.afterCryptoUSD).toBeCloseTo(317.44, 4);
+    expect(breakdown.totalBeforeCashbackUSD).toBeCloseTo(317.44, 4);
+    expect(breakdown.cashbackRate).toBe(0.02);
+    expect(breakdown.potentialCashbackUSD).toBeCloseTo(6.3488, 4);
+    expect(breakdown.effectiveCashbackUSD).toBe(breakdown.potentialCashbackUSD);
+    expect(breakdown.totalUSD).toBeCloseTo(311.0912, 4);
+  });
+
+  it("en USD 500 el total es 490 sin comisiones", () => {
+    const result = calculateMethod(
+      methodById("binance-card-u"),
+      { currency: "USD", amount: 500 },
+      {},
+    );
+    if (result.status !== "ok") {
+      throw new Error("El escenario debe calcular correctamente.");
+    }
+    expect(result.breakdown.fxFeeCostUSD).toBe(0);
+    expect(result.breakdown.cryptoFeeCostUSD).toBe(0);
+    expect(result.breakdown.totalUSD).toBeCloseTo(490, 6);
+  });
+
+  it("mantiene la selección de niveles por monto de compra", () => {
+    const result = calculateMethod(
+      methodById("binance-card-u"),
+      { currency: "USD", amount: 50 },
+      {},
+    );
+    if (result.status !== "ok") {
+      throw new Error("El escenario debe calcular correctamente.");
+    }
+    expect(result.breakdown.cashbackRate).toBe(0.015);
+    expect(result.breakdown.cashbackTierLabel).toContain("Nivel 1");
+    expect(result.breakdown.totalUSD).toBeCloseTo(49.25, 6);
+  });
+});
+
 describe("Validaciones de entrada", () => {
   it("monto igual a cero devuelve error", () => {
     const result = calculateMethod(
@@ -289,7 +338,7 @@ describe("Validaciones de entrada", () => {
     expect(errorIds).toEqual(
       expect.arrayContaining(["okx-card", "io", "mexc-card"]),
     );
-    expect(comparison.cheapestId).toBe("binance-paypay");
+    expect(comparison.cheapestId).toBe("binance-card-u");
   });
 });
 
@@ -367,7 +416,7 @@ describe("Compras en dólares", () => {
 
   it("excluye PayPay y elige el menor costo en dólares", () => {
     const comparison = compareMethods(paymentMethods, usdPurchase, {});
-    expect(comparison.results).toHaveLength(5);
+    expect(comparison.results).toHaveLength(6);
     expect(comparison.results.map((result) => result.method.id)).not.toContain(
       "binance-paypay",
     );
@@ -601,6 +650,6 @@ describe("Comportamiento del motor", () => {
     expect(comparison.results.map((result) => result.method.id)).not.toContain(
       "mexc-card",
     );
-    expect(comparison.cheapestId).toBe("okx-card");
+    expect(comparison.cheapestId).toBe("binance-card-u");
   });
 });

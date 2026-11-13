@@ -252,6 +252,28 @@ describe("Conversiones y transferencias internas", () => {
     expect(calculation.result.steps[1].costAmount).toBe(0);
   });
 
+  it("la ruta con U convierte a paridad y sin costo de conversión", () => {
+    const calculation = calculateFunding({
+      route: routeById("binance-p2p-binance-card-u"),
+      source: sourceById("binance-p2p"),
+      targetAmount: 100,
+      targetAsset: "U",
+      penPerUsdt: 3.78,
+    });
+
+    if (calculation.status !== "ok") {
+      throw new Error(`El cálculo devolvió error: ${calculation.reason}`);
+    }
+
+    expect(calculation.result.targetAsset).toBe("U");
+    expect(calculation.result.acquiredUsdt).toBeCloseTo(100.07, 6);
+    expect(calculation.result.initialPenRequired).toBeCloseTo(378.27, 2);
+    expect(calculation.result.steps).toHaveLength(1);
+    expect(calculation.result.steps[0].label).toBe("USDT → U");
+    expect(calculation.result.steps[0].asset).toBe("U");
+    expect(calculation.result.steps[0].costAmount).toBe(0);
+  });
+
   it("aplica tasa de conversión y comisión porcentual en el orden correcto", () => {
     const route: FundingRoute = {
       id: "test-conversion",

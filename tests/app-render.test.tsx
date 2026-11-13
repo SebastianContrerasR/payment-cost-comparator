@@ -19,6 +19,7 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Métodos de pago");
     expect(html).toContain("Binance Card (USDC)");
     expect(html).toContain("Binance Card (USDT)");
+    expect(html).toContain("Binance Card (U)");
     expect(html).toContain("Moneda de referencia: USD");
   });
 
@@ -45,7 +46,7 @@ describe("App (renderizado inicial)", () => {
 
   it("permite activar y desactivar métodos desde la configuración", () => {
     expect(html).toContain("Métodos de pago");
-    expect(html).toContain("6 activos");
+    expect(html).toContain("7 activos");
     expect(html).toContain("Bybit Card");
     expect(html).toContain("Bitget Card");
     expect(html).toContain("Todos");
@@ -186,7 +187,7 @@ describe("InputPanel (compra en USD)", () => {
 
   it("bloquea los métodos que no están disponibles para la moneda", () => {
     expect(usdHtml).toContain("Métodos de pago");
-    expect(usdHtml).toContain("5 activos");
+    expect(usdHtml).toContain("6 activos");
     expect(usdHtml).toContain("Binance PayPay");
     expect(usdHtml).toContain("Solo JPY");
     expect(usdHtml).toContain("disabled");

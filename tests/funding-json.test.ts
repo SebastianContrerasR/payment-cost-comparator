@@ -34,19 +34,17 @@ describe("funding JSON", () => {
         rates: settings.rates,
         fees: settings.fees,
         sourcesEnabled: settings.sourcesEnabled,
-        networkOverrides: {},
         conversionRates: settings.conversionRates,
       },
     });
   });
 
-  it("hace round-trip con tasas nulas, fuentes apagadas y red manual", () => {
+  it("hace round-trip con tasas nulas, fuentes apagadas y conversión nula", () => {
     const settings = defaultSettings();
     const modified = {
       rates: { ...settings.rates, "binance-p2p": null },
       fees: { ...settings.fees, "binance-p2p": 0.1 },
       sourcesEnabled: { ...settings.sourcesEnabled, "binance-p2p": false },
-      networkOverrides: { "binance-p2p-mexc": "bep20" },
       conversionRates: { ...settings.conversionRates, "okx:USDG": null },
     };
 
@@ -127,34 +125,15 @@ describe("funding JSON", () => {
     });
   });
 
-  it("rechaza una ruta que no tiene selección de red", () => {
+  it("rechaza claves que no son inputs de fondeo", () => {
     const settings = defaultSettings();
     const raw = serializeFundingJson(settings);
     const parsed = JSON.parse(raw) as Record<string, unknown>;
-    parsed.routes = {
-      ...(parsed.routes as Record<string, unknown>),
-      "binance-p2p-binance": null,
-    };
+    parsed.routes = { "binance-p2p-mexc": "bep20" };
 
     expect(parseFundingJson(JSON.stringify(parsed))).toEqual({
       ok: false,
-      error: 'La ruta "binance-p2p-binance" no tiene selección de red.',
-    });
-  });
-
-  it("rechaza una red que no existe", () => {
-    const settings = defaultSettings();
-    const raw = serializeFundingJson(settings);
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    parsed.routes = {
-      ...(parsed.routes as Record<string, unknown>),
-      "binance-p2p-mexc": "red-fantasma",
-    };
-
-    expect(parseFundingJson(JSON.stringify(parsed))).toEqual({
-      ok: false,
-      error:
-        '"routes.binance-p2p-mexc" debe ser null (automática) o una red conocida.',
+      error: 'La clave "routes" no es un input de fondeo; usa "sources" y "conversionRates".',
     });
   });
 

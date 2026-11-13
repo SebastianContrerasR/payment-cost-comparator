@@ -366,7 +366,7 @@ export function FundingPanel({ model }: FundingPanelProps) {
           </h2>
           <p className="card-subtitle">
             {mode === "json"
-              ? "Edita todo el fondeo como JSON; cada cambio válido se aplica al instante."
+              ? "Edita los inputs de fondeo como JSON; cada cambio válido se aplica al instante."
               : "Cuánto cuesta conseguir el saldo que necesita cada tarjeta: tasa de adquisición, ruta, red y desembolso en soles. Se revisa una vez al mes."}
           </p>
         </div>
@@ -426,10 +426,10 @@ export function FundingPanel({ model }: FundingPanelProps) {
           />
           <p className="field-hint" id="funding-json-help">
             Objeto con <code>sources</code> (cada fuente define{" "}
-            <code>penPerUsdt</code>, <code>fee</code> y <code>enabled</code>),{" "}
-            <code>routes</code> (red de cada ruta con selección de red;{" "}
-            <code>null</code> = automática) y <code>conversionRates</code>. Los
-            cambios válidos se aplican al instante.
+            <code>penPerUsdt</code>, <code>fee</code> y <code>enabled</code>) y{" "}
+            <code>conversionRates</code>. Solo los inputs de configuración: la
+            red de cada ruta se elige en la tabla y no entra aquí. Los cambios
+            válidos se aplican al instante.
           </p>
           {jsonError ? (
             <p className="json-error" role="alert">

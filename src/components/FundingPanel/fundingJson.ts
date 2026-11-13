@@ -1,29 +1,15 @@
-import fundingPlatforms from "../../data/fundingNetworks";
-import fundingRoutes from "../../data/fundingRoutes";
 import fundingSources from "../../data/fundingSources";
 import { defaultConversionRates } from "../../domain/funding";
 import type { FundingSettings } from "../../hooks/useFunding";
 
 const SOURCE_IDS = fundingSources.map((source) => source.id);
-const NETWORK_ROUTE_IDS = fundingRoutes
-  .filter((route) =>
-    route.steps.some(
-      (step) => step.kind === "transfer" && step.network !== undefined,
-    ),
-  )
-  .map((route) => route.id);
 const CONVERSION_DEFAULTS = defaultConversionRates();
 const CONVERSION_KEYS = Object.keys(CONVERSION_DEFAULTS);
-
-const KNOWN_NETWORK_IDS: ReadonlySet<string> = new Set(
-  fundingPlatforms.flatMap((platform) =>
-    platform.networks.flatMap((network) => [network.networkId, network.network]),
-  ),
-);
+const TOP_LEVEL_KEYS = ["sources", "conversionRates"];
 
 export type FundingJsonUpdate = Pick<
   FundingSettings,
-  "rates" | "fees" | "sourcesEnabled" | "networkOverrides" | "conversionRates"
+  "rates" | "fees" | "sourcesEnabled" | "conversionRates"
 >;
 
 export type FundingJsonParseResult =
@@ -54,14 +40,6 @@ function settingsBoolean(
 ): boolean {
   const value = map[id];
   return value === undefined ? fallback : value;
-}
-
-function settingsOverride(
-  map: Record<string, string | null>,
-  routeId: string,
-): string | null {
-  const value = map[routeId];
-  return value === undefined ? null : value;
 }
 
 function readNumberField(
@@ -104,14 +82,6 @@ export function serializeFundingJson(settings: FundingSettings): string {
     };
   }
 
-  const routes: Record<string, string | null> = {};
-  for (const route of fundingRoutes) {
-    if (!NETWORK_ROUTE_IDS.includes(route.id)) {
-      continue;
-    }
-    routes[route.id] = settingsOverride(settings.networkOverrides, route.id);
-  }
-
   const conversionRates: Record<string, number | null> = {};
   for (const key of CONVERSION_KEYS) {
     conversionRates[key] = settingsNumber(
@@ -121,7 +91,7 @@ export function serializeFundingJson(settings: FundingSettings): string {
     );
   }
 
-  return JSON.stringify({ sources, routes, conversionRates }, null, 2);
+  return JSON.stringify({ sources, conversionRates }, null, 2);
 }
 
 function parseSources(
@@ -164,40 +134,6 @@ function parseSources(
     enabled[id] = isEnabled.value;
   }
   return { ok: true, rates, fees, enabled };
-}
-
-function parseRoutes(
-  value: unknown,
-): { ok: true; overrides: Record<string, string | null> } | { ok: false; error: string } {
-  if (!isRecord(value)) {
-    return { ok: false, error: '"routes" debe ser un objeto.' };
-  }
-  for (const key of Object.keys(value)) {
-    if (!NETWORK_ROUTE_IDS.includes(key)) {
-      return { ok: false, error: `La ruta "${key}" no tiene selección de red.` };
-    }
-  }
-
-  const overrides: Record<string, string | null> = {};
-  for (const id of NETWORK_ROUTE_IDS) {
-    const network = value[id];
-    if (network === undefined) {
-      return { ok: false, error: `Falta "routes.${id}".` };
-    }
-    if (
-      network !== null &&
-      (typeof network !== "string" || !KNOWN_NETWORK_IDS.has(network))
-    ) {
-      return {
-        ok: false,
-        error: `"routes.${id}" debe ser null (automática) o una red conocida.`,
-      };
-    }
-    if (network !== null) {
-      overrides[id] = network;
-    }
-  }
-  return { ok: true, overrides };
 }
 
 function parseConversionRates(
@@ -243,13 +179,18 @@ export function parseFundingJson(raw: string): FundingJsonParseResult {
     return { ok: false, error: "La entrada JSON debe ser un objeto." };
   }
 
+  for (const key of Object.keys(parsed)) {
+    if (!TOP_LEVEL_KEYS.includes(key)) {
+      return {
+        ok: false,
+        error: `La clave "${key}" no es un input de fondeo; usa "sources" y "conversionRates".`,
+      };
+    }
+  }
+
   const sources = parseSources(parsed.sources);
   if (!sources.ok) {
     return sources;
-  }
-  const routes = parseRoutes(parsed.routes);
-  if (!routes.ok) {
-    return routes;
   }
   const conversionRates = parseConversionRates(parsed.conversionRates);
   if (!conversionRates.ok) {
@@ -262,7 +203,6 @@ export function parseFundingJson(raw: string): FundingJsonParseResult {
       rates: sources.rates,
       fees: sources.fees,
       sourcesEnabled: sources.enabled,
-      networkOverrides: routes.overrides,
       conversionRates: conversionRates.rates,
     },
   };

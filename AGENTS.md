@@ -176,7 +176,10 @@ y en la leyenda (`legend-dot--*`):
   (`aria-invalid`, `role="alert"`, badge de validez).
 - El JSON cubre exactamente los inputs visibles del card, nada más:
   valores que no se editan en la UI no van en el JSON, y aplicar el JSON
-  preserva el resto del estado.
+  preserva el resto del estado. En cards que mezclan configuración y
+  resultados (Fondeo), el JSON cubre solo las secciones de input
+  (Fuentes de adquisición y Conversiones de activo); la tabla de rutas
+  y sus selects de red no entran en el JSON.
 - La serialización y validación viven en un `json.ts` junto al
   componente: `InputPanel/inputJson.ts` y `FundingPanel/fundingJson.ts`.
 - El parseo es estricto: JSON malformado, tipos inválidos, IDs o claves

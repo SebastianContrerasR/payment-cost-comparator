@@ -3,6 +3,7 @@ import type {
   CalculationResult,
   FundingSummary,
   OkCalculationResult,
+  PurchaseCurrency,
 } from "../../domain/types";
 import {
   formatPen,
@@ -162,6 +163,7 @@ export const ALL_COLUMN_KEYS: readonly SortKey[] = COLUMNS.map(
 );
 
 interface ComparisonTableProps {
+  purchaseCurrency: PurchaseCurrency;
   results: CalculationResult[];
   cheapestId: string | null;
   selectedId: string | null;
@@ -194,15 +196,17 @@ const SORT_ACCESSORS: Record<
 > = {
   name: (row) => row.method.name.toLowerCase(),
   network: (row) => row.method.network.toLowerCase(),
-  exchangeRate: (row) => row.breakdown.exchangeRate,
+  exchangeRate: (row) =>
+    row.breakdown.exchangeRate ?? Number.POSITIVE_INFINITY,
   baseAmountUSD: (row) => row.breakdown.baseAmountUSD,
   fxFee: (row) => row.method.fees.fxFee,
   afterFxUSD: (row) => row.breakdown.afterFxUSD,
   cryptoFee: (row) => row.method.fees.cryptoFee,
   otherFees: otherFeesTotalUSD,
   totalBeforeCashbackUSD: (row) => row.breakdown.totalBeforeCashbackUSD,
-  cashbackRate: (row) => row.method.cashback.rate,
-  cashbackCapUSD: (row) => row.method.cashback.cap ?? Number.POSITIVE_INFINITY,
+  cashbackRate: (row) => row.breakdown.cashbackRate,
+  cashbackCapUSD: (row) =>
+    row.breakdown.cashbackCapUSD ?? Number.POSITIVE_INFINITY,
   potentialCashbackUSD: (row) => row.breakdown.potentialCashbackUSD,
   effectiveCashbackUSD: (row) => row.breakdown.effectiveCashbackUSD,
   totalUSD: (row) => row.breakdown.totalUSD,
@@ -296,6 +300,7 @@ function formatFeeRule(
 }
 
 export function ComparisonTable({
+  purchaseCurrency,
   results,
   cheapestId,
   selectedId,
@@ -366,11 +371,19 @@ export function ComparisonTable({
       case "network":
         return method.network;
       case "exchangeRate":
-        return formatRate(breakdown.exchangeRate);
+        return breakdown.exchangeRate === null ? (
+          <span className="cell-muted">—</span>
+        ) : (
+          formatRate(breakdown.exchangeRate)
+        );
       case "baseAmountUSD":
         return formatUsd(breakdown.baseAmountUSD);
       case "fxFee":
-        return formatPercent(method.fees.fxFee);
+        return purchaseCurrency === "USD" ? (
+          <span className="cell-muted">—</span>
+        ) : (
+          formatPercent(method.fees.fxFee)
+        );
       case "afterFxUSD":
         return formatUsd(breakdown.afterFxUSD);
       case "cryptoFee":
@@ -390,12 +403,16 @@ export function ComparisonTable({
       case "totalBeforeCashbackUSD":
         return formatUsd(breakdown.totalBeforeCashbackUSD);
       case "cashbackRate":
-        return formatPercent(method.cashback.rate);
+        return (
+          <span title={breakdown.cashbackTierLabel ?? undefined}>
+            {formatPercent(breakdown.cashbackRate)}
+          </span>
+        );
       case "cashbackCapUSD":
-        return method.cashback.cap === null ? (
+        return breakdown.cashbackCapUSD === null ? (
           <span className="cell-muted">Ilimitado</span>
         ) : (
-          formatUsd(method.cashback.cap, 2)
+          formatUsd(breakdown.cashbackCapUSD, 2)
         );
       case "potentialCashbackUSD":
         return formatUsd(breakdown.potentialCashbackUSD);
@@ -431,7 +448,9 @@ export function ComparisonTable({
     <section className="card table-card" aria-label="Tabla comparativa">
       <div className="table-toolbar">
         <p className="table-units">
-          Importes en USD · tipo de cambio en JPY/USD
+          {purchaseCurrency === "USD"
+            ? "Importes en USD · compra en dólares sin conversión de divisa"
+            : "Importes en USD · tipo de cambio en JPY/USD"}
         </p>
         <ColumnPicker
           columns={pickerColumns}
@@ -494,6 +513,13 @@ export function ComparisonTable({
             </tr>
           </thead>
           <tbody>
+            {sortedRows.length === 0 ? (
+              <tr className="row-empty">
+                <td colSpan={columns.length} className="table-empty">
+                  No hay métodos activos. Actívalos en “Configuración de entrada”.
+                </td>
+              </tr>
+            ) : null}
             {sortedRows.map((row) =>
               row.status === "ok" ? (
                 <tr

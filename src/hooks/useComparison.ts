@@ -4,15 +4,16 @@ import type {
   ComparisonResult,
   ExchangeRateInput,
   PaymentMethod,
+  PurchaseInput,
 } from "../domain/types";
 
 export function useComparison(
   methods: readonly PaymentMethod[],
-  amountJPY: number | null,
+  purchase: PurchaseInput,
   exchangeRates: ExchangeRateInput,
 ): ComparisonResult {
   return useMemo(
-    () => compareMethods(methods, amountJPY, exchangeRates),
-    [methods, amountJPY, exchangeRates],
+    () => compareMethods(methods, purchase, exchangeRates),
+    [methods, purchase, exchangeRates],
   );
 }

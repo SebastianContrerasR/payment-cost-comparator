@@ -2,6 +2,7 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import App from "../src/App";
 import BreakdownModal from "../src/components/BreakdownModal/BreakdownModal";
+import InputPanel from "../src/components/InputPanel/InputPanel";
 import FundingRouteBreakdown from "../src/components/FundingRouteBreakdown/FundingRouteBreakdown";
 import { calculateMethod } from "../src/domain/calculator";
 import { calculateFunding } from "../src/domain/funding";
@@ -15,11 +16,16 @@ describe("App (renderizado inicial)", () => {
   it("muestra el encabezado con las monedas de la comparación", () => {
     expect(html).toContain("Comparador de métodos de pago");
     expect(html).toContain("Moneda origen: JPY");
+    expect(html).toContain("Métodos de pago");
+    expect(html).toContain("Binance Card (USDC)");
+    expect(html).toContain("Binance Card (USDT)");
+    expect(html).toContain("Binance Card (U)");
     expect(html).toContain("Moneda de referencia: USD");
   });
 
   it("muestra el panel de entrada con monto y tipos de cambio por defecto", () => {
     expect(html).toContain("Monto JPY");
+    expect(html).not.toContain("Gasto mensual USD");
     expect(html).toContain("50000");
     expect(html).toContain("157.710157");
     expect(html).toContain("157.51008064");
@@ -32,9 +38,26 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Binance Card");
     expect(html).toContain(">IO<");
     expect(html).toContain("MEXC Card");
+    expect(html).toContain("Métodos habilitados");
 
-    expect(html).not.toContain("Bybit Card");
-    expect(html).not.toContain("Bitget Card");
+    expect(html).not.toContain('data-method-id="bybit-card"');
+    expect(html).not.toContain('data-method-id="bitget-card"');
+  });
+
+  it("permite activar y desactivar métodos desde la configuración", () => {
+    expect(html).toContain("Métodos de pago");
+    expect(html).toContain("7 activos");
+    expect(html).toContain("Bybit Card");
+    expect(html).toContain("Bitget Card");
+    expect(html).toContain("Todos");
+    expect(html).toContain("Restablecer");
+  });
+
+  it("ofrece alternar toda la configuración entre inputs individuales y JSON", () => {
+    expect(html).toContain('aria-label="Modo de edición de configuración"');
+    expect(html).toContain("Configuración");
+    expect(html).toContain("Individual");
+    expect(html).toContain("JSON");
   });
 
   it("elige al ganador por desembolso en soles con el escenario por defecto", () => {
@@ -111,11 +134,23 @@ describe("App (renderizado inicial)", () => {
       html.indexOf("Ver desglose de la ruta de MEXC Card"),
     );
     expect(html).toContain("326.55");
+    expect(html).toContain("326.70");
     expect(html).not.toContain("Sin ruta de fondeo disponible");
     expect(html).not.toContain("Tasa de mercado");
     expect(html).not.toContain("Sobrecosto vs mercado");
     expect(html).not.toContain("cuánto debería costar 1 USDT sin");
     expect(html).toContain("no lista BEP20");
+    expect(html.indexOf("Fuentes de adquisición")).toBeLessThan(
+      html.indexOf("El método con menor desembolso es"),
+    );
+    expect(
+      html.indexOf('aria-label="Mejor ruta de fondeo por método de pago"'),
+    ).toBeGreaterThan(
+      html.indexOf("El método con menor desembolso es"),
+    );
+    expect(
+      html.indexOf('aria-label="Mejor ruta de fondeo por método de pago"'),
+    ).toBeLessThan(html.indexOf('aria-label="Tabla comparativa"'));
   });
 
   it("no muestra el detalle por defecto: se abre al seleccionar", () => {
@@ -123,6 +158,58 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Selecciona un método de la tabla para ver");
     expect(html).not.toContain("breakdown-modal");
     expect(html).not.toContain("Requisitos");
+  });
+});
+
+describe("InputPanel (compra en USD)", () => {
+  const usdHtml = renderToString(
+    <InputPanel
+      currency="USD"
+      onCurrencyChange={() => {}}
+      amount={500}
+      onAmountChange={() => {}}
+      methods={paymentMethods}
+      activeMethodIds={paymentMethods
+        .filter((method) => method.enabled)
+        .map((method) => method.id)}
+      onToggleMethod={() => {}}
+      onSelectAllMethods={() => {}}
+      onResetMethods={() => {}}
+      exchangeRates={{
+        visa: 157.710157,
+        mastercard: 157.51008064,
+        paypay: 157.71524839,
+      }}
+      onExchangeRateChange={() => {}}
+    />,
+  );
+
+  it("muestra los inputs individuales sin editor JSON propio", () => {
+    expect(usdHtml).not.toContain("Modo de edición de entrada");
+    expect(usdHtml).not.toContain("Configuración JSON");
+  });
+
+  it("muestra el monto en dólares y oculta los tipos de cambio", () => {
+    expect(usdHtml).toContain("Moneda de compra");
+    expect(usdHtml).toContain("Monto USD");
+    expect(usdHtml).not.toContain("Gasto mensual USD");
+    expect(usdHtml).toContain("Importe de la compra en dólares");
+    expect(usdHtml).not.toContain("Tipo de cambio Visa");
+    expect(usdHtml).not.toContain("Tipo de cambio Mastercard");
+    expect(usdHtml).not.toContain("Tipo de cambio PayPay");
+  });
+
+  it("bloquea los métodos que no están disponibles para la moneda", () => {
+    expect(usdHtml).toContain("Métodos de pago");
+    expect(usdHtml).toContain("6 activos");
+    expect(usdHtml).toContain("Binance PayPay");
+    expect(usdHtml).toContain("Solo JPY");
+    expect(usdHtml).toContain("disabled");
+  });
+
+  it("explica que el pago en dólares no tiene conversión ni cross-border", () => {
+    expect(usdHtml).toContain("sin conversión de divisa");
+    expect(usdHtml).toContain("ni comisiones cross-border");
   });
 });
 
@@ -176,7 +263,11 @@ describe("BreakdownModal (render SSR)", () => {
   if (!method) {
     throw new Error("El método binance-card debe existir en la data.");
   }
-  const okResult = calculateMethod(method, 50000, exchangeRates);
+  const okResult = calculateMethod(
+    method,
+    { currency: "JPY", amount: 50000 },
+    exchangeRates,
+  );
   if (okResult.status !== "ok") {
     throw new Error("El caso base debe calcular correctamente.");
   }
@@ -202,7 +293,11 @@ describe("BreakdownModal (render SSR)", () => {
   });
 
   it("renderiza el estado de error del método en el modal", () => {
-    const errorResult = calculateMethod(method, null, exchangeRates);
+    const errorResult = calculateMethod(
+      method,
+      { currency: "JPY", amount: null },
+      exchangeRates,
+    );
     const errorHtml = renderToString(
       <BreakdownModal result={errorResult} onClose={() => {}} />,
     );

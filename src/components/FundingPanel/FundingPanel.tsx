@@ -40,7 +40,11 @@ function SourceRow({
   onToggle: () => void;
 }) {
   return (
-    <div className="funding-row">
+    <div
+      className={`funding-row${
+        source.enabled ? "" : " funding-row--inactive"
+      }`}
+    >
       <div className="funding-row-main">
         <span className="funding-name">{source.label}</span>
         <span className="cell-sub">
@@ -76,15 +80,28 @@ function SourceRow({
           onChange={(event) => onFeeChange(toNumber(event.target.value))}
         />
       </label>
-      <label className="funding-toggle">
-        <input
-          type="checkbox"
-          checked={source.enabled}
-          onChange={onToggle}
-          aria-label={`Usar ${source.label} en las rutas`}
-        />
-        <span>{source.enabled ? "Activa" : "Inactiva"}</span>
-      </label>
+      <div className="funding-field funding-toggle-field">
+        <span>Usar en rutas</span>
+        <label className="funding-toggle">
+          <input
+            type="checkbox"
+            className="funding-toggle-input visually-hidden"
+            checked={source.enabled}
+            onChange={onToggle}
+            aria-label={`Usar ${source.label} en las rutas`}
+          />
+          <span className="funding-switch" aria-hidden="true">
+            <span className="funding-switch-knob" />
+          </span>
+          <span
+            className={`funding-switch-text${
+              source.enabled ? " is-on" : ""
+            }`}
+          >
+            {source.enabled ? "Activa" : "Inactiva"}
+          </span>
+        </label>
+      </div>
     </div>
   );
 }

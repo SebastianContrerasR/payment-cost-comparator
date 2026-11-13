@@ -11,7 +11,7 @@ cashback de Binance Card.
 - **Moneda origen:** JPY o USD · **Moneda de referencia:** USD
 - **Monto de compra:** en USD también determina el nivel de cashback de Binance Card.
 - **Métodos de pago:** selector con casillas para activar o desactivar cada método; la preferencia se guarda en el navegador. Los métodos no disponibles para la moneda elegida aparecen bloqueados.
-- **Edición JSON:** el selector **Individual/JSON** convierte toda la configuración (moneda, monto, tipos de cambio y métodos activos) en un único objeto editable; cada JSON válido se aplica al instante y los errores se muestran sin modificar el estado.
+- **Edición JSON:** cada tarjeta de configuración tiene el selector **Individual/JSON** y convierte sus inputs en un objeto editable. **Configuración de entrada** cubre moneda, monto, tipos de cambio y métodos activos; **Fondeo** cubre tasas y comisiones por fuente, fuentes y rutas activas, red por ruta y conversiones de activo. Cada JSON válido se aplica al instante y los errores se muestran sin modificar el estado.
 - **Persistencia:** la moneda, los montos JPY/USD y los tipos de cambio conservan el último valor ingresado en `localStorage`.
 - SPA sin backend: todo corre en el navegador, los datos son configuración por código.
 - Tabla configurable: columnas ocultables desde el botón **Columnas** (con *Seleccionar todo*/*Restablecer*, preferencia persistida) y cabeceras agrupadas por color con **leyenda** al pie: identidad, conversión, comisiones, cashback y resultado.
@@ -135,6 +135,7 @@ La suite cubre:
   incluido el recorte del nivel 3 al límite de 100 USD.
 - **Variante USDT:** totales de referencia en JPY y USD, con crypto fee de 0.9%.
 - **Selección de métodos:** visibilidad de todos los métodos en el selector y bloqueo de los no disponibles para la moneda.
+- **Editores JSON:** round-trip y validación estricta (JSON malformado, tipos, IDs y claves desconocidas, claves faltantes) del JSON de entrada y del JSON de fondeo.
 - **Persistencia de entradas:** carga, validación y respaldo de la configuración de compra guardada.
 - **Humo de UI:** renderizado inicial con `react-dom/server` (sin navegador).
 

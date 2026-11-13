@@ -179,8 +179,8 @@ export function InputPanel({
 
   return (
     <section className="card" aria-labelledby="input-panel-title">
-      <div className="card-head card-head--input">
-        <div className="input-card-heading">
+      <div className="card-head card-head--split">
+        <div className="card-head-heading">
           <h2 id="input-panel-title" className="card-title">
             Configuración de entrada
           </h2>

@@ -167,6 +167,24 @@ y en la leyenda (`legend-dot--*`):
   los valores inválidos caen al default por campo, no descartan todo
   el objeto.
 
+### Editor JSON de inputs
+
+- Toda tarjeta con inputs de configuración tiene el toggle
+  **Individual/JSON** (Configuración de entrada y Fondeo). Al entrar a
+  JSON serializa su estado completo y cada cambio válido se aplica al
+  instante; los errores se muestran sin tocar el estado
+  (`aria-invalid`, `role="alert"`, badge de validez).
+- La serialización y validación viven en un `json.ts` junto al
+  componente: `InputPanel/inputJson.ts` y `FundingPanel/fundingJson.ts`.
+- El parseo es estricto: JSON malformado, tipos inválidos, IDs o claves
+  desconocidas y claves faltantes devuelven error visible. Nunca se
+  aplica un estado parcial ni se inventan defaults silenciosos.
+- **Regla:** todo input nuevo se agrega junto con su serialización, su
+  validación y sus tests en el editor JSON del card correspondiente, en
+  el mismo commit.
+- Las claves y campos del JSON van en inglés; los mensajes de error, en
+  español.
+
 ## Agregar un método de pago
 
 1. Configuración en `src/data/paymentMethods.ts` (usa una key de

@@ -53,6 +53,10 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Restablecer");
   });
 
+  it("ofrece alternar el fondeo entre inputs individuales y JSON", () => {
+    expect(html).toContain('aria-label="Modo de edición de fondeo"');
+  });
+
   it("elige al ganador por desembolso en soles con el escenario por defecto", () => {
     expect(html).toContain("menor desembolso");
     expect(html).toContain("Binance PayPay");

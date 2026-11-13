@@ -1,4 +1,5 @@
 import fundingPlatforms from "../data/fundingNetworks";
+import fundingRoutes from "../data/fundingRoutes";
 import type {
   Asset,
   FundingCalculation,
@@ -204,6 +205,19 @@ export function routeAsset(route: FundingRoute): Asset {
 export function routeDestination(route: FundingRoute, source: FundingSource): string {
   const last = route.steps[route.steps.length - 1];
   return last ? last.to : source.to;
+}
+
+export function defaultConversionRates(): Record<string, number> {
+  const rates: Record<string, number> = {};
+  for (const route of fundingRoutes) {
+    for (const step of route.steps) {
+      if (step.kind !== "convert" || !step.toAsset) {
+        continue;
+      }
+      rates[`${platformOf(step.to)}:${step.toAsset}`] = step.conversionRate ?? 1;
+    }
+  }
+  return rates;
 }
 
 function resolveTransfer(

@@ -5,6 +5,7 @@ import fundingSources from "../data/fundingSources";
 import {
   applyCashback,
   calculateFunding,
+  defaultConversionRates,
   platformOf,
   routeAsset,
   routeDestination,
@@ -83,19 +84,7 @@ export interface FundingModel {
   toggleRoute: (routeId: string) => void;
   setNetworkOverride: (routeId: string, networkId: string | null) => void;
   setConversionRate: (key: string, value: number | null) => void;
-}
-
-function defaultConversionRates(): Record<string, number> {
-  const rates: Record<string, number> = {};
-  for (const route of fundingRoutes) {
-    for (const step of route.steps) {
-      if (step.kind !== "convert" || !step.toAsset) {
-        continue;
-      }
-      rates[`${platformOf(step.to)}:${step.toAsset}`] = step.conversionRate ?? 1;
-    }
-  }
-  return rates;
+  applySettings: (next: FundingSettings) => void;
 }
 
 function defaultSettings(): FundingSettings {
@@ -556,6 +545,10 @@ export function useFunding(results: CalculationResult[]): FundingModel {
     [update],
   );
 
+  const applySettings = useCallback((next: FundingSettings) => {
+    setSettings(next);
+  }, []);
+
   return {
     settings,
     sourceViews,
@@ -570,6 +563,7 @@ export function useFunding(results: CalculationResult[]): FundingModel {
     toggleRoute,
     setNetworkOverride,
     setConversionRate,
+    applySettings,
   };
 }
 

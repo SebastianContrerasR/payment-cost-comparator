@@ -8,6 +8,7 @@ import type {
   FundingSourceView,
 } from "../../hooks/useFunding";
 import FundingRouteBreakdown from "../FundingRouteBreakdown/FundingRouteBreakdown";
+import { parseFundingJson, serializeFundingJson } from "./fundingJson";
 import {
   formatPen,
   formatPercent,
@@ -291,12 +292,37 @@ function OptionItem({
   );
 }
 
+type FundingMode = "form" | "json";
+
 export function FundingPanel({ model }: FundingPanelProps) {
+  const [mode, setMode] = useState<FundingMode>("form");
+  const [jsonDraft, setJsonDraft] = useState("");
+  const [jsonError, setJsonError] = useState<string | null>(null);
   const [routeBreakdown, setRouteBreakdown] = useState<{
     methodName: string;
     routeLabel: string;
     calculation: FundingCalculation;
   } | null>(null);
+
+  function showJsonEditor() {
+    if (mode === "json") {
+      return;
+    }
+    setJsonDraft(serializeFundingJson(model.settings));
+    setJsonError(null);
+    setMode("json");
+  }
+
+  function handleJsonChange(value: string) {
+    setJsonDraft(value);
+    const parsed = parseFundingJson(value);
+    if (!parsed.ok) {
+      setJsonError(parsed.error);
+      return;
+    }
+    setJsonError(null);
+    model.applySettings(parsed.value);
+  }
 
   const winner =
     model.methodViews.find(
@@ -316,17 +342,88 @@ export function FundingPanel({ model }: FundingPanelProps) {
 
   return (
     <section className="card funding-card" aria-labelledby="funding-panel-title">
-      <div className="card-head">
-        <h2 id="funding-panel-title" className="card-title">
-          Fondeo
-        </h2>
-        <p className="card-subtitle">
-          Cuánto cuesta conseguir el saldo que necesita cada tarjeta: tasa de
-          adquisición, ruta, red y desembolso en soles. Se revisa una vez al mes.
-        </p>
+      <div className="card-head card-head--split">
+        <div className="card-head-heading">
+          <h2 id="funding-panel-title" className="card-title">
+            Fondeo
+          </h2>
+          <p className="card-subtitle">
+            {mode === "json"
+              ? "Edita todo el fondeo como JSON; cada cambio válido se aplica al instante."
+              : "Cuánto cuesta conseguir el saldo que necesita cada tarjeta: tasa de adquisición, ruta, red y desembolso en soles. Se revisa una vez al mes."}
+          </p>
+        </div>
+        <div
+          className="input-mode-toggle"
+          role="group"
+          aria-label="Modo de edición de fondeo"
+        >
+          <button
+            type="button"
+            className={`input-mode-option${
+              mode === "form" ? " is-active" : ""
+            }`}
+            aria-pressed={mode === "form"}
+            onClick={() => setMode("form")}
+          >
+            Individual
+          </button>
+          <button
+            type="button"
+            className={`input-mode-option${
+              mode === "json" ? " is-active" : ""
+            }`}
+            aria-pressed={mode === "json"}
+            onClick={showJsonEditor}
+          >
+            JSON
+          </button>
+        </div>
       </div>
 
-      <h3 className="funding-subtitle">Fuentes de adquisición</h3>
+      {mode === "json" ? (
+        <div className="json-editor">
+          <div className="json-editor-head">
+            <label className="field-label" htmlFor="funding-json">
+              Configuración JSON
+            </label>
+            <span
+              id="funding-json-status"
+              className={`json-status${
+                jsonError ? " json-status--error" : ""
+              }`}
+            >
+              {jsonError ? "JSON inválido" : "Válido · aplicado"}
+            </span>
+          </div>
+          <textarea
+            id="funding-json"
+            className={`json-textarea${
+              jsonError ? " json-textarea--error" : ""
+            }`}
+            value={jsonDraft}
+            onChange={(event) => handleJsonChange(event.target.value)}
+            spellCheck={false}
+            aria-invalid={jsonError !== null}
+            aria-describedby="funding-json-help funding-json-status"
+          />
+          <p className="field-hint" id="funding-json-help">
+            Objeto con <code>sources</code> (cada fuente define{" "}
+            <code>penPerUsdt</code>, <code>fee</code> y <code>enabled</code>),{" "}
+            <code>routes</code> (cada ruta define <code>enabled</code> y{" "}
+            <code>network</code>, con null para la red automática) y{" "}
+            <code>conversionRates</code>. Los cambios válidos se aplican al
+            instante.
+          </p>
+          {jsonError ? (
+            <p className="json-error" role="alert">
+              {jsonError}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <>
+          <h3 className="funding-subtitle">Fuentes de adquisición</h3>
       <div className="funding-list">
         {model.sourceViews.map((source) => (
           <SourceRow
@@ -484,6 +581,8 @@ export function FundingPanel({ model }: FundingPanelProps) {
         Las redes y sus comisiones se actualizan en{" "}
         <code>src/data/fundingNetworks.ts</code>.
       </p>
+        </>
+      )}
 
       {routeBreakdown ? (
         <FundingRouteBreakdown

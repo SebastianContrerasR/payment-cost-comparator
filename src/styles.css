@@ -140,7 +140,7 @@ code {
   font-size: 13.5px;
 }
 
-.card-head--input {
+.card-head--split {
   flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
@@ -148,7 +148,7 @@ code {
   flex-wrap: wrap;
 }
 
-.input-card-heading {
+.card-head-heading {
   display: flex;
   flex-direction: column;
   gap: 3px;

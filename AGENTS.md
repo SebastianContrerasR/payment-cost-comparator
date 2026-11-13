@@ -8,10 +8,10 @@ o actualiza este archivo antes de continuar.
 ## Proyecto
 
 Comparador del costo efectivo de métodos de pago al comprar en Japón
-(JPY) contra una referencia en USD. SPA sin backend: React 19 +
-TypeScript + Vite, desplegada en GitHub Pages. Los datos son
-configuración por código; los tests son regresión contra el Excel de
-referencia (`docs/example.md`).
+(JPY) o en dólares (USD), contra una referencia en USD. SPA sin
+backend: React 19 + TypeScript + Vite, desplegada en GitHub Pages. Los
+datos son configuración por código; los tests de regresión del Excel
+(`docs/example.md`) cubren el escenario JPY.
 
 ## Comandos
 
@@ -54,10 +54,36 @@ referencia (`docs/example.md`).
 src/
 ├── domain/      Motor de cálculo puro. Sin React, sin imports de UI.
 ├── data/        Configuración por código (métodos de pago).
-├── hooks/       React: estado y recálculo (useComparison, useVisibleColumns).
+├── hooks/       React: estado y recálculo (useComparison, useVisibleColumns,
+│               useActiveMethods, usePurchaseInputs).
 ├── components/  UI. Una carpeta por componente con export nombrado + default.
 └── utils/       Formateo (currency.ts) y redondeo estable.
 ```
+
+Reglas de compra:
+
+- El motor recibe `PurchaseInput` (`currency` + `amount`), no un
+  monto suelto. `JPY` exige tipo de cambio; `USD` usa el monto como
+  base y no aplica FX fee ni cross-border. Crypto fee y otras
+  comisiones sí aplican.
+- El monto de compra convertido a USD (`baseAmountUSD`) selecciona el
+  rango de cashback cuando el método declara `cashback.tiers`. Sin
+  tiers se usa `rate` y `cap`; el nivel no altera la base ni las
+  comisiones.
+- Binance Card se declara como dos métodos según el activo de pago:
+  `binance-card` (USDC, crypto fee 0.1%) y `binance-card-usdt` (USDT,
+  crypto fee 0.9%). Comparten red, FX y rangos de cashback.
+- Cashback de Binance: Nivel 1 (<100 USD) 1.5% sin límite; Nivel 2
+  (100 a <1,000 USD) 2% sin límite; Nivel 3 (≥1,000 USD) 3% con límite
+  de 100 USD.
+- Cada método declara `supportedCurrencies`; PayPay es solo `JPY` y se
+  excluye de la comparación en USD.
+- `useActiveMethods` controla qué métodos entran a la comparación. Por
+  defecto activa los que tienen `enabled: true`; el usuario puede
+  activar los inactivos y la selección se persiste en
+  `payment-cost-comparator.active-methods`. Los métodos no soportados
+  por la moneda se muestran bloqueados.
+- La regresión de los 7 totales del Excel corresponde solo a `JPY`.
 
 Reglas de separación:
 
@@ -134,17 +160,25 @@ y en la leyenda (`legend-dot--*`):
   sufijo descriptivo (ej.: `payment-cost-comparator.visible-columns`),
   siempre validadas al leer (esquema guardado puede ser viejo) y con
   escritura protegida (modo privado).
+- `payment-cost-comparator.purchase-inputs` guarda moneda, montos
+  JPY/USD y tipos de cambio. Los montos admiten `null` (campo vacío);
+  los valores inválidos caen al default por campo, no descartan todo
+  el objeto.
 
 ## Agregar un método de pago
 
 1. Configuración en `src/data/paymentMethods.ts` (usa una key de
    tipo de cambio existente, o agrega la nueva en
-   `DEFAULT_EXCHANGE_RATES` y en `RATE_FIELDS`).
+   `DEFAULT_EXCHANGE_RATES` y en `RATE_FIELDS`) y declara sus monedas en
+   `supportedCurrencies`.
 2. Ficha documental en `docs/payment-methods-info.md` con fuentes
    oficiales.
-3. Verifica el total del nuevo método contra el Excel y agrega una
+3. Si el cashback depende del monto de compra, declara
+   `cashback.tiers` con umbrales ascendentes y elige el último cuyo
+   `minAmountUSD` no supere el monto convertido a USD.
+4. Verifica el total del nuevo método contra el Excel y agrega una
    aserción de regresión en `tests/calculator.test.ts`.
-4. `enabled: false` elimina el método de la tabla sin tirar su config.
+5. `enabled: false` elimina el método de la tabla sin tirar su config.
 
 ## Actualizar este archivo
 

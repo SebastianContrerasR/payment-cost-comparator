@@ -1,4 +1,28 @@
-import type { PaymentMethod } from "../domain/types";
+import type { CashbackTier, PaymentMethod } from "../domain/types";
+
+const BINANCE_CASHBACK_TIERS: CashbackTier[] = [
+  {
+    id: "level-1",
+    label: "Nivel 1 · menos de 100 USD",
+    minAmountUSD: 0,
+    rate: 0.015,
+    cap: null,
+  },
+  {
+    id: "level-2",
+    label: "Nivel 2 · 100 a menos de 1,000 USD",
+    minAmountUSD: 100,
+    rate: 0.02,
+    cap: null,
+  },
+  {
+    id: "level-3",
+    label: "Nivel 3 · 1,000 USD o más",
+    minAmountUSD: 1_000,
+    rate: 0.03,
+    cap: 100,
+  },
+];
 
 const paymentMethods: PaymentMethod[] = [
   {
@@ -7,6 +31,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "Binance",
     network: "PayPay",
     exchangeRateKey: "paypay",
+    supportedCurrencies: ["JPY"],
     enabled: true,
     fees: {
       fxFee: 0,
@@ -42,6 +67,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "OKX",
     network: "Visa Platinum",
     exchangeRateKey: "visa",
+    supportedCurrencies: ["JPY", "USD"],
     enabled: true,
     fees: {
       fxFee: 0,
@@ -89,10 +115,11 @@ const paymentMethods: PaymentMethod[] = [
   },
   {
     id: "binance-card",
-    name: "Binance Card",
+    name: "Binance Card (USDC)",
     provider: "Binance",
     network: "Mastercard",
     exchangeRateKey: "mastercard",
+    supportedCurrencies: ["JPY", "USD"],
     enabled: true,
     fees: {
       fxFee: 0.02,
@@ -102,7 +129,8 @@ const paymentMethods: PaymentMethod[] = [
     },
     cashback: {
       rate: 0.02,
-      cap: 100,
+      cap: null,
+      tiers: BINANCE_CASHBACK_TIERS,
       currency: "",
       timing: "Según las condiciones vigentes",
       base: "amountAfterFees",
@@ -110,13 +138,57 @@ const paymentMethods: PaymentMethod[] = [
     funding: { account: "binance:spot", asset: "USDC" },
     requirements: [
       "Pagar con USDC para aplicar la comisión de conversión preferencial de 0.1%.",
-      "Mantener un gasto mensual mínimo de 100 USD para calificar al nivel de cashback esperado (Nivel 2).",
+      "El nivel de cashback se estima con el monto de compra convertido a USD.",
     ],
     observations: [
-      "FX Fee de 2% adicional al tipo de cambio de Mastercard.",
+      "FX Fee de 2% adicional al tipo de cambio de Mastercard en compras con conversión de divisa.",
       "La conversión general de criptomonedas es de 0.9%; el 0.1% del escenario aplica al pagar con USDC en los países disponibles y Nueva Zelanda.",
-      "Niveles de cashback: Nivel 1 (gasto menor a 100 USD): 1.5%; Nivel 2 (100 a 1,000 USD): 2%; Nivel 3 (más de 1,000 USD): 3%.",
-      "Se considera que se califica al Nivel 2, con 2% de cashback.",
+      "Cashback por niveles: Nivel 1 (menos de 100 USD): 1.5%; Nivel 2 (100 a menos de 1,000 USD): 2%; Nivel 3 (1,000 USD o más): 3%.",
+      "El Nivel 3 tiene un límite mensual equivalente a 100 USD; los niveles 1 y 2 no tienen límite.",
+    ],
+    sources: [
+      {
+        label: "Comisiones de Binance Card",
+        url: "https://www.binance.com/es-LA/support/faq/detail/f34b3138d61a4f79b594bb7290ac09b3",
+      },
+      {
+        label: "Binance Card Cashback",
+        url: "https://www.binance.com/es-LA/support/faq/detail/48e903b7cc8841e293bfd2486be4d025",
+      },
+    ],
+  },
+  {
+    id: "binance-card-usdt",
+    name: "Binance Card (USDT)",
+    provider: "Binance",
+    network: "Mastercard",
+    exchangeRateKey: "mastercard",
+    supportedCurrencies: ["JPY", "USD"],
+    enabled: true,
+    fees: {
+      fxFee: 0.02,
+
+      cryptoFee: 0.009,
+      otherFees: [],
+    },
+    cashback: {
+      rate: 0.02,
+      cap: null,
+      tiers: BINANCE_CASHBACK_TIERS,
+      currency: "",
+      timing: "Según las condiciones vigentes",
+      base: "amountAfterFees",
+    },
+    funding: { account: "binance:spot", asset: "USDT" },
+    requirements: [
+      "Pagar con USDT: aplica la comisión general de conversión de criptomonedas de 0.9%.",
+      "El nivel de cashback se estima con el monto de compra convertido a USD.",
+    ],
+    observations: [
+      "FX Fee de 2% adicional al tipo de cambio de Mastercard en compras con conversión de divisa.",
+      "La conversión con USDC cuesta 0.1%; con USDT se aplica la comisión general de 0.9%.",
+      "Cashback por niveles: Nivel 1 (menos de 100 USD): 1.5%; Nivel 2 (100 a menos de 1,000 USD): 2%; Nivel 3 (1,000 USD o más): 3%.",
+      "El Nivel 3 tiene un límite mensual equivalente a 100 USD; los niveles 1 y 2 no tienen límite.",
     ],
     sources: [
       {
@@ -135,6 +207,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "Bybit",
     network: "Mastercard",
     exchangeRateKey: "mastercard",
+    supportedCurrencies: ["JPY", "USD"],
     enabled: false,
     fees: {
       fxFee: 0.02,
@@ -180,6 +253,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "IO",
     network: "Visa",
     exchangeRateKey: "visa",
+    supportedCurrencies: ["JPY", "USD"],
     enabled: true,
     fees: {
       fxFee: 0.03,
@@ -223,6 +297,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "Bitget",
     network: "Visa",
     exchangeRateKey: "visa",
+    supportedCurrencies: ["JPY", "USD"],
     enabled: false,
     fees: {
       fxFee: 0.01,
@@ -264,6 +339,7 @@ const paymentMethods: PaymentMethod[] = [
     provider: "MEXC",
     network: "Visa Platinum",
     exchangeRateKey: "visa",
+    supportedCurrencies: ["JPY", "USD"],
     enabled: true,
     fees: {
       fxFee: 0,

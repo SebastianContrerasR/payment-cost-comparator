@@ -123,6 +123,8 @@ export function PaymentMethodDetailsBody({
   method,
   funding,
 }: PaymentMethodDetailsProps) {
+  const cashbackTiers = method.cashback.tiers ?? [];
+
   return (
       <div className="details-body">
         <FundingSection method={method} funding={funding} />
@@ -148,21 +150,39 @@ export function PaymentMethodDetailsBody({
           <dl className="info-list">
             <div className="info-row">
               <dt>Tasa</dt>
-              <dd>{formatPercent(method.cashback.rate)}</dd>
-            </div>
-            <div className="info-row">
-              <dt>Límite mensual</dt>
               <dd>
-                {method.cashback.cap === null
-                  ? "Ilimitado"
-                  : formatUsd(method.cashback.cap, 2)}
+                {cashbackTiers.length > 0
+                  ? "Según el monto de compra"
+                  : formatPercent(method.cashback.rate)}
               </dd>
             </div>
+            {cashbackTiers.length === 0 ? (
+              <div className="info-row">
+                <dt>Límite mensual</dt>
+                <dd>
+                  {method.cashback.cap === null
+                    ? "Ilimitado"
+                    : formatUsd(method.cashback.cap, 2)}
+                </dd>
+              </div>
+            ) : null}
             <div className="info-row">
               <dt>Base de cálculo</dt>
               <dd>Monto después de comisiones</dd>
             </div>
           </dl>
+          {cashbackTiers.length > 0 ? (
+            <ul className="notes-list">
+              {cashbackTiers.map((tier) => (
+                <li key={tier.id}>
+                  <strong>{tier.label}</strong>: {formatPercent(tier.rate)}
+                  {tier.cap === null
+                    ? " · sin límite mensual"
+                    : ` · límite ${formatUsd(tier.cap, 2)}`}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
 
         <section className="details-section">

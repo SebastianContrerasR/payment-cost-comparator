@@ -9,25 +9,24 @@ import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
 import PaymentMethodPanel from "./components/PaymentMethodPanel/PaymentMethodPanel";
 import paymentMethods from "./data/paymentMethods";
 import { isOkResult } from "./domain/calculator";
-import type { ExchangeRateInput, OkCalculationResult } from "./domain/types";
+import type { OkCalculationResult } from "./domain/types";
+import { useActiveMethods } from "./hooks/useActiveMethods";
 import { useComparison } from "./hooks/useComparison";
 import { useFunding } from "./hooks/useFunding";
+import { usePurchaseInputs } from "./hooks/usePurchaseInputs";
 import { useVisibleColumns } from "./hooks/useVisibleColumns";
 import { formatPen, formatUsd } from "./utils/currency";
 
-const DEFAULT_AMOUNT_JPY = 50_000;
-
-const DEFAULT_EXCHANGE_RATES: ExchangeRateInput = {
-  visa: 157.710157,
-  mastercard: 157.51008064,
-  paypay: 157.71524839,
-};
-
 export default function App() {
-  const [amountJPY, setAmountJPY] = useState<number | null>(DEFAULT_AMOUNT_JPY);
-  const [exchangeRates, setExchangeRates] = useState<ExchangeRateInput>(
-    DEFAULT_EXCHANGE_RATES,
-  );
+  const {
+    currency,
+    amount,
+    exchangeRates,
+    setCurrency,
+    setAmount,
+    setExchangeRate,
+    applyPurchaseInputs,
+  } = usePurchaseInputs();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [breakdownId, setBreakdownId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState>({
@@ -40,6 +39,28 @@ export default function App() {
     selectAll: showAllColumns,
     reset: resetVisibleColumns,
   } = useVisibleColumns();
+  const {
+    activeMethodIds,
+    toggleMethod,
+    selectAllMethods,
+    resetMethods,
+    setActiveMethods,
+  } = useActiveMethods(paymentMethods);
+
+  const comparisonMethods = useMemo(
+    () =>
+      paymentMethods
+        .filter((method) => activeMethodIds.includes(method.id))
+        .map((method) => ({ ...method, enabled: true })),
+    [activeMethodIds],
+  );
+  const enabledMethodsCount = useMemo(
+    () =>
+      comparisonMethods.filter((method) =>
+        method.supportedCurrencies.includes(currency),
+      ).length,
+    [comparisonMethods, currency],
+  );
 
   useEffect(() => {
     if (sort.key !== "name" && !visibleColumns.includes(sort.key)) {
@@ -47,9 +68,20 @@ export default function App() {
     }
   }, [sort.key, visibleColumns]);
 
+  useEffect(() => {
+    if (selectedId !== null && !activeMethodIds.includes(selectedId)) {
+      setSelectedId(null);
+    }
+    if (breakdownId !== null && !activeMethodIds.includes(breakdownId)) {
+      setBreakdownId(null);
+    }
+  }, [activeMethodIds, breakdownId, selectedId]);
+
+  const purchase = useMemo(() => ({ currency, amount }), [currency, amount]);
+
   const { results, cheapestId } = useComparison(
-    paymentMethods,
-    amountJPY,
+    comparisonMethods,
+    purchase,
     exchangeRates,
   );
   const funding = useFunding(results);
@@ -152,39 +184,37 @@ export default function App() {
     );
   }, []);
 
-  const handleExchangeRateChange = useCallback(
-    (key: string, value: number | null) => {
-      setExchangeRates((previous) => ({ ...previous, [key]: value }));
-    },
-    [],
-  );
-
   return (
     <div className="page">
       <header className="app-header">
         <h1>Comparador de métodos de pago</h1>
         <p className="app-description">
-          Compara el costo efectivo de tarjetas y métodos de pago al comprar en
-          Japón: introduce el monto en JPY y consulta cómo influyen el tipo de
-          cambio de cada red, las comisiones (FX y cripto), otras comisiones y
-          el cashback en el costo final.
+          {currency === "USD"
+            ? "Compara el costo efectivo de tarjetas y métodos de pago al comprar en dólares: introduce el monto en USD y consulta cómo influyen las comisiones, el cashback y el tipo de cambio de fondeo en el costo final."
+            : "Compara el costo efectivo de tarjetas y métodos de pago al comprar en Japón: introduce el monto en JPY y consulta cómo influyen el tipo de cambio de cada red, las comisiones (FX y cripto), otras comisiones y el cashback en el costo final."}
         </p>
         <div className="chip-row">
-          <span className="chip">Moneda origen: JPY</span>
+          <span className="chip">{`Moneda origen: ${currency}`}</span>
           <span className="chip">Moneda de referencia: USD</span>
-          <span className="chip">
-            Métodos habilitados:{" "}
-            {paymentMethods.filter((method) => method.enabled).length}
-          </span>
+          <span className="chip">Métodos habilitados: {enabledMethodsCount}</span>
         </div>
       </header>
 
       <main className="app-main">
         <InputPanel
-          amountJPY={amountJPY}
-          onAmountChange={setAmountJPY}
+          currency={currency}
+          onCurrencyChange={setCurrency}
+          amount={amount}
+          onAmountChange={setAmount}
+          methods={paymentMethods}
+          activeMethodIds={activeMethodIds}
+          onToggleMethod={toggleMethod}
+          onSelectAllMethods={selectAllMethods}
+          onResetMethods={resetMethods}
           exchangeRates={exchangeRates}
-          onExchangeRateChange={handleExchangeRateChange}
+          onExchangeRateChange={setExchangeRate}
+          onApplyInputs={applyPurchaseInputs}
+          onApplyMethods={setActiveMethods}
         />
 
         <FundingPanel model={funding} />
@@ -211,6 +241,7 @@ export default function App() {
         ) : null}
 
         <ComparisonTable
+          purchaseCurrency={currency}
           results={results}
           cheapestId={bestId}
           funding={funding.byMethodId}

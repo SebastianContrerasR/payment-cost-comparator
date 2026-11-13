@@ -39,23 +39,36 @@ export function CalculationBreakdown({
 
   return (
     <div className="breakdown">
-      <BreakdownRow label="Monto original" value={formatJpy(breakdown.amountJPY)} />
       <BreakdownRow
-        label={`Tipo de cambio (${method.exchangeRateKey})`}
-        value={`${formatRate(breakdown.exchangeRate)} JPY/USD`}
-        group="conversion"
+        label="Monto original"
+        value={
+          breakdown.purchaseCurrency === "USD"
+            ? formatUsd(breakdown.amountOriginal, 2)
+            : formatJpy(breakdown.amountOriginal)
+        }
       />
-      <BreakdownRow
-        label="Conversión a USD"
-        value={formatUsd(breakdown.baseAmountUSD)}
-        group="conversion"
-        variant="divider"
-      />
-      <BreakdownRow
-        label={`FX Fee (${formatPercent(method.fees.fxFee)})`}
-        value={`+${formatUsd(breakdown.fxFeeCostUSD)}`}
-        group="fees"
-      />
+      {breakdown.exchangeRate !== null ? (
+        <>
+          <BreakdownRow
+            label={`Tipo de cambio (${method.exchangeRateKey})`}
+            value={`${formatRate(breakdown.exchangeRate)} JPY/USD`}
+            group="conversion"
+          />
+          <BreakdownRow
+            label="Conversión a USD"
+            value={formatUsd(breakdown.baseAmountUSD)}
+            group="conversion"
+            variant="divider"
+          />
+        </>
+      ) : null}
+      {breakdown.purchaseCurrency === "USD" ? null : (
+        <BreakdownRow
+          label={`FX Fee (${formatPercent(method.fees.fxFee)})`}
+          value={`+${formatUsd(breakdown.fxFeeCostUSD)}`}
+          group="fees"
+        />
+      )}
       <BreakdownRow
         label={`Crypto Fee (${formatPercent(method.fees.cryptoFee)})`}
         value={`+${formatUsd(breakdown.cryptoFeeCostUSD)}`}
@@ -79,10 +92,17 @@ export function CalculationBreakdown({
         group="fees"
         variant="divider"
       />
-      {method.cashback.rate > 0 ? (
+      {breakdown.cashbackRate > 0 ? (
         <>
+          {breakdown.cashbackTierLabel ? (
+            <BreakdownRow
+              label="Nivel de cashback"
+              value={breakdown.cashbackTierLabel}
+              group="cashback"
+            />
+          ) : null}
           <BreakdownRow
-            label={`Cashback potencial (${formatPercent(method.cashback.rate)})`}
+            label={`Cashback potencial (${formatPercent(breakdown.cashbackRate)})`}
             value={formatUsd(breakdown.potentialCashbackUSD)}
             group="cashback"
           />

@@ -46,24 +46,42 @@
 
 ## 3. Binance Card
 
+La tarjeta tiene dos variantes según el activo con el que se paga. Comparten red, FX Fee y cashback; cambia la comisión de conversión.
+
+### 3.1 Binance Card (USDC)
+
 **Comisiones**
 - Red de pago: Mastercard.
-- Comisión por cambio de divisa (FX Fee): 2%.
-- Comisión por conversión de criptomonedas: 0.9%.
-- Excepción USDC: comisión de conversión de 0.1% para el resto de los países donde la tarjeta está disponible y Nueva Zelanda.
+- FX Fee: 2% en compras con conversión de divisa.
+- Comisión por conversión de criptomonedas: 0.1% al pagar con USDC en los países donde la tarjeta está disponible y Nueva Zelanda.
+- Comisión general de conversión: 0.9% para otros activos.
 
-**Cashback actual**
+**Cashback por niveles**
 
-Se considera que calificamos para el Nivel 2, siempre que alcancemos el gasto mínimo mensual de 100 USD.
+| Nivel | Gasto mensual del proveedor (USD) | Cashback | Límite mensual |
+|---|---:|---:|---:|
+| Nivel 1 | Menos de 100 USD | 1.5% | Sin límite |
+| Nivel 2 | 100 a menos de 1,000 USD | 2.0% | Sin límite |
+| Nivel 3 | 1,000 USD o más | 3.0% | 100 USD |
 
-| Nivel | Gasto mensual | Cashback |
-|---|---:|---:|
-| Nivel 1 | Menos de 100 USD | 1.5% |
-| Nivel 2 | 100 - 1,000 USD | 2% |
-| Nivel 3 | ≥ 1,000 USD | 3% |
+- La app estima el nivel con el monto de la compra convertido a USD.
+- El Nivel 3 tiene un límite mensual equivalente a 100 USD.
 
-- Nivel esperado: Nivel 2.
-- Cashback esperado: 2%.
+**Documentación**
+- [Comisiones de Binance Card](https://www.binance.com/es-LA/support/faq/detail/f34b3138d61a4f79b594bb7290ac09b3)
+- [Binance Card Cashback](https://www.binance.com/es-LA/support/faq/detail/48e903b7cc8841e293bfd2486be4d025)
+
+### 3.2 Binance Card (USDT)
+
+**Comisiones**
+- Red de pago: Mastercard.
+- FX Fee: 2% en compras con conversión de divisa.
+- Comisión por conversión de criptomonedas: 0.9% al pagar con USDT (comisión general).
+- Con USDC la misma compra paga 0.1% de conversión.
+
+**Cashback por niveles**
+
+Aplica la misma tabla de niveles que la variante USDC: 1.5%, 2.0% y 3.0%, con el límite de 100 USD en el Nivel 3.
 
 **Documentación**
 - [Comisiones de Binance Card](https://www.binance.com/es-LA/support/faq/detail/f34b3138d61a4f79b594bb7290ac09b3)

@@ -1,3 +1,11 @@
+export const PURCHASE_CURRENCIES = ["JPY", "USD"] as const;
+export type PurchaseCurrency = (typeof PURCHASE_CURRENCIES)[number];
+
+export interface PurchaseInput {
+  currency: PurchaseCurrency;
+  amount: number | null;
+}
+
 export type FeeRuleType = "percentage" | "fixed";
 
 export interface FeeRule {
@@ -13,11 +21,21 @@ export interface FeeRule {
 export const CASHBACK_BASES = ["amountAfterFees"] as const;
 export type CashbackBase = (typeof CASHBACK_BASES)[number];
 
+export interface CashbackTier {
+  id: string;
+  label: string;
+  minAmountUSD: number;
+  rate: number;
+  cap: number | null;
+}
+
 export interface CashbackConfig {
 
   rate: number;
 
   cap: number | null;
+
+  tiers?: CashbackTier[];
 
   currency: string;
 
@@ -48,6 +66,7 @@ export interface PaymentMethod {
   network: string;
 
   exchangeRateKey: string;
+  supportedCurrencies: PurchaseCurrency[];
   enabled: boolean;
   fees: FeesConfig;
   cashback: CashbackConfig;
@@ -68,8 +87,9 @@ export interface OtherFeeLine {
 }
 
 export interface CalculationBreakdown {
-  amountJPY: number;
-  exchangeRate: number;
+  purchaseCurrency: PurchaseCurrency;
+  amountOriginal: number;
+  exchangeRate: number | null;
 
   baseAmountUSD: number;
 
@@ -84,6 +104,8 @@ export interface CalculationBreakdown {
 
   totalBeforeCashbackUSD: number;
 
+  cashbackRate: number;
+  cashbackTierLabel: string | null;
   potentialCashbackUSD: number;
   cashbackCapUSD: number | null;
   effectiveCashbackUSD: number;

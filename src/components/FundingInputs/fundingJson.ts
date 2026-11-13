@@ -68,7 +68,7 @@ function readBooleanField(
   return { ok: true, value };
 }
 
-export function serializeFundingJson(settings: FundingSettings): string {
+export function serializeFundingJsonObject(settings: FundingSettings): object {
   const sources: Record<string, unknown> = {};
   for (const source of fundingSources) {
     sources[source.id] = {
@@ -91,14 +91,19 @@ export function serializeFundingJson(settings: FundingSettings): string {
     );
   }
 
-  return JSON.stringify({ sources, conversionRates }, null, 2);
+  return { sources, conversionRates };
+}
+
+export function serializeFundingJson(settings: FundingSettings): string {
+  return JSON.stringify(serializeFundingJsonObject(settings), null, 2);
 }
 
 function parseSources(
   value: unknown,
+  pathPrefix: string,
 ): { ok: true; rates: Record<string, number | null>; fees: Record<string, number | null>; enabled: Record<string, boolean> } | { ok: false; error: string } {
   if (!isRecord(value)) {
-    return { ok: false, error: '"sources" debe ser un objeto.' };
+    return { ok: false, error: `"${pathPrefix}" debe ser un objeto.` };
   }
   for (const key of Object.keys(value)) {
     if (!SOURCE_IDS.includes(key)) {
@@ -112,20 +117,26 @@ function parseSources(
   for (const id of SOURCE_IDS) {
     const entry = value[id];
     if (entry === undefined) {
-      return { ok: false, error: `Falta "sources.${id}".` };
+      return { ok: false, error: `Falta "${pathPrefix}.${id}".` };
     }
     if (!isRecord(entry)) {
-      return { ok: false, error: `"sources.${id}" debe ser un objeto.` };
+      return { ok: false, error: `"${pathPrefix}.${id}" debe ser un objeto.` };
     }
-    const rate = readNumberField(`sources.${id}.penPerUsdt`, entry.penPerUsdt);
+    const rate = readNumberField(
+      `${pathPrefix}.${id}.penPerUsdt`,
+      entry.penPerUsdt,
+    );
     if (!rate.ok) {
       return rate;
     }
-    const fee = readNumberField(`sources.${id}.fee`, entry.fee);
+    const fee = readNumberField(`${pathPrefix}.${id}.fee`, entry.fee);
     if (!fee.ok) {
       return fee;
     }
-    const isEnabled = readBooleanField(`sources.${id}.enabled`, entry.enabled);
+    const isEnabled = readBooleanField(
+      `${pathPrefix}.${id}.enabled`,
+      entry.enabled,
+    );
     if (!isEnabled.ok) {
       return isEnabled;
     }
@@ -138,9 +149,10 @@ function parseSources(
 
 function parseConversionRates(
   value: unknown,
+  pathPrefix: string,
 ): { ok: true; rates: Record<string, number | null> } | { ok: false; error: string } {
   if (!isRecord(value)) {
-    return { ok: false, error: '"conversionRates" debe ser un objeto.' };
+    return { ok: false, error: `"${pathPrefix}" debe ser un objeto.` };
   }
   for (const key of Object.keys(value)) {
     if (!CONVERSION_KEYS.includes(key)) {
@@ -155,15 +167,61 @@ function parseConversionRates(
   for (const key of CONVERSION_KEYS) {
     const entry = value[key];
     if (entry === undefined) {
-      return { ok: false, error: `Falta "conversionRates.${key}".` };
+      return { ok: false, error: `Falta "${pathPrefix}.${key}".` };
     }
-    const rate = readNumberField(`conversionRates.${key}`, entry);
+    const rate = readNumberField(`${pathPrefix}.${key}`, entry);
     if (!rate.ok) {
       return rate;
     }
     rates[key] = rate.value;
   }
   return { ok: true, rates };
+}
+
+export function parseFundingJsonObject(
+  value: unknown,
+  pathPrefix = "",
+): FundingJsonParseResult {
+  const path = (field: string) =>
+    pathPrefix ? `${pathPrefix}.${field}` : field;
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      error: `"${pathPrefix || "entrada JSON"}" debe ser un objeto.`,
+    };
+  }
+
+  for (const key of Object.keys(value)) {
+    if (!TOP_LEVEL_KEYS.includes(key)) {
+      return {
+        ok: false,
+        error: `La clave "${key}" no es un input de fondeo; usa "sources" y "conversionRates".`,
+      };
+    }
+  }
+
+  const sources = parseSources(value.sources, path("sources"));
+  if (!sources.ok) {
+    return sources;
+  }
+  const conversionRates = parseConversionRates(
+    value.conversionRates,
+    path("conversionRates"),
+  );
+  if (!conversionRates.ok) {
+    return conversionRates;
+  }
+
+  return {
+    ok: true,
+    value: {
+      rates: sources.rates,
+      fees: sources.fees,
+      sourcesEnabled: sources.enabled,
+      conversionRates: conversionRates.rates,
+    },
+  };
 }
 
 export function parseFundingJson(raw: string): FundingJsonParseResult {
@@ -179,31 +237,5 @@ export function parseFundingJson(raw: string): FundingJsonParseResult {
     return { ok: false, error: "La entrada JSON debe ser un objeto." };
   }
 
-  for (const key of Object.keys(parsed)) {
-    if (!TOP_LEVEL_KEYS.includes(key)) {
-      return {
-        ok: false,
-        error: `La clave "${key}" no es un input de fondeo; usa "sources" y "conversionRates".`,
-      };
-    }
-  }
-
-  const sources = parseSources(parsed.sources);
-  if (!sources.ok) {
-    return sources;
-  }
-  const conversionRates = parseConversionRates(parsed.conversionRates);
-  if (!conversionRates.ok) {
-    return conversionRates;
-  }
-
-  return {
-    ok: true,
-    value: {
-      rates: sources.rates,
-      fees: sources.fees,
-      sourcesEnabled: sources.enabled,
-      conversionRates: conversionRates.rates,
-    },
-  };
+  return parseFundingJsonObject(parsed);
 }

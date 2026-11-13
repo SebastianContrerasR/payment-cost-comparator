@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   PURCHASE_CURRENCIES,
   type ExchangeRateInput,
@@ -6,11 +5,6 @@ import {
   type PurchaseCurrency,
 } from "../../domain/types";
 import { MethodPicker } from "./MethodPicker";
-import {
-  parseInputJson,
-  serializeInputJson,
-  type InputJsonValues,
-} from "./inputJson";
 
 interface InputPanelProps {
   currency: PurchaseCurrency;
@@ -24,15 +18,7 @@ interface InputPanelProps {
   onResetMethods: () => void;
   exchangeRates: ExchangeRateInput;
   onExchangeRateChange: (key: string, value: number | null) => void;
-  onApplyInputs: (update: {
-    currency: PurchaseCurrency;
-    amount: number | null;
-    exchangeRates: ExchangeRateInput;
-  }) => void;
-  onApplyMethods: (ids: readonly string[]) => void;
 }
-
-type InputMode = "form" | "json";
 
 const RATE_FIELDS: Array<{
   key: string;
@@ -60,6 +46,8 @@ const RATE_FIELDS: Array<{
 ];
 
 const RATE_KEYS = RATE_FIELDS.map((field) => field.key);
+
+export { RATE_KEYS };
 const RATE_HINT = "JPY por USD · Monto USD = Monto JPY / TC";
 
 function toNumber(value: string): number | null {
@@ -135,129 +123,22 @@ export function InputPanel({
   onResetMethods,
   exchangeRates,
   onExchangeRateChange,
-  onApplyInputs,
-  onApplyMethods,
 }: InputPanelProps) {
-  const [mode, setMode] = useState<InputMode>("form");
-  const [jsonDraft, setJsonDraft] = useState("");
-  const [jsonError, setJsonError] = useState<string | null>(null);
   const isUsd = currency === "USD";
-
-  function showJsonEditor() {
-    if (mode === "json") {
-      return;
-    }
-    const values: InputJsonValues = {
-      currency,
-      amount,
-      exchangeRates,
-      methods: [...activeMethodIds],
-    };
-    setJsonDraft(serializeInputJson(values));
-    setJsonError(null);
-    setMode("json");
-  }
-
-  function handleJsonChange(value: string) {
-    setJsonDraft(value);
-    const parsed = parseInputJson(value, {
-      rateKeys: RATE_KEYS,
-      knownMethodIds: methods.map((method) => method.id),
-    });
-    if (!parsed.ok) {
-      setJsonError(parsed.error);
-      return;
-    }
-    setJsonError(null);
-    onApplyInputs({
-      currency: parsed.value.currency,
-      amount: parsed.value.amount,
-      exchangeRates: parsed.value.exchangeRates,
-    });
-    onApplyMethods(parsed.value.methods);
-  }
 
   return (
     <section className="card" aria-labelledby="input-panel-title">
-      <div className="card-head card-head--split">
-        <div className="card-head-heading">
-          <h2 id="input-panel-title" className="card-title">
-            Configuración de entrada
-          </h2>
-          <p className="card-subtitle">
-            {mode === "json"
-              ? "Edita toda la configuración como JSON; cada cambio válido se aplica al instante."
-              : "Ajusta la compra y los tipos de cambio; la tabla se actualiza al instante."}
-          </p>
-        </div>
-        <div
-          className="input-mode-toggle"
-          role="group"
-          aria-label="Modo de edición de entrada"
-        >
-          <button
-            type="button"
-            className={`input-mode-option${
-              mode === "form" ? " is-active" : ""
-            }`}
-            aria-pressed={mode === "form"}
-            onClick={() => setMode("form")}
-          >
-            Individual
-          </button>
-          <button
-            type="button"
-            className={`input-mode-option${
-              mode === "json" ? " is-active" : ""
-            }`}
-            aria-pressed={mode === "json"}
-            onClick={showJsonEditor}
-          >
-            JSON
-          </button>
-        </div>
+      <div className="card-head">
+        <h2 id="input-panel-title" className="card-title">
+          Configuración de entrada
+        </h2>
+        <p className="card-subtitle">
+          Ajusta la compra y los tipos de cambio; la tabla se actualiza al
+          instante.
+        </p>
       </div>
       <div className="input-panel">
-        {mode === "json" ? (
-          <div className="json-editor">
-            <div className="json-editor-head">
-              <label className="field-label" htmlFor="input-json">
-                Configuración JSON
-              </label>
-              <span
-                id="input-json-status"
-                className={`json-status${
-                  jsonError ? " json-status--error" : ""
-                }`}
-              >
-                {jsonError ? "JSON inválido" : "Válido · aplicado"}
-              </span>
-            </div>
-            <textarea
-              id="input-json"
-              className={`json-textarea${
-                jsonError ? " json-textarea--error" : ""
-              }`}
-              value={jsonDraft}
-              onChange={(event) => handleJsonChange(event.target.value)}
-              spellCheck={false}
-              aria-invalid={jsonError !== null}
-              aria-describedby="input-json-help input-json-status"
-            />
-            <p className="field-hint" id="input-json-help">
-              Objeto con <code>currency</code>, <code>amount</code>,{" "}
-              <code>exchangeRates</code> y <code>methods</code>. Los cambios
-              válidos se aplican al instante.
-            </p>
-            {jsonError ? (
-              <p className="json-error" role="alert">
-                {jsonError}
-              </p>
-            ) : null}
-          </div>
-        ) : (
-          <>
-            <section
+          <section
               className="input-section"
               aria-labelledby="purchase-section-title"
             >
@@ -358,8 +239,6 @@ export function InputPanel({
                 </div>
               </section>
             )}
-          </>
-        )}
       </div>
     </section>
   );

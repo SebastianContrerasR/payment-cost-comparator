@@ -41,87 +41,89 @@ function readNumber(
   return { ok: true, value };
 }
 
-export function serializeInputJson(values: InputJsonValues): string {
-  return JSON.stringify(
-    {
-      currency: values.currency,
-      amount: values.amount,
-      exchangeRates: values.exchangeRates,
-      methods: values.methods,
-    },
-    null,
-    2,
-  );
+export function serializeInputJsonObject(values: InputJsonValues): object {
+  return {
+    currency: values.currency,
+    amount: values.amount,
+    exchangeRates: values.exchangeRates,
+    methods: values.methods,
+  };
 }
 
-export function parseInputJson(
-  raw: string,
+export function serializeInputJson(values: InputJsonValues): string {
+  return JSON.stringify(serializeInputJsonObject(values), null, 2);
+}
+
+export function parseInputJsonObject(
+  value: unknown,
   options: InputJsonParseOptions,
+  pathPrefix = "",
 ): InputJsonParseResult {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    const detail = error instanceof Error ? ` ${error.message}` : "";
-    return { ok: false, error: `JSON inválido.${detail}` };
+  const path = (field: string) =>
+    pathPrefix ? `${pathPrefix}.${field}` : field;
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      error: `"${pathPrefix || "entrada JSON"}" debe ser un objeto.`,
+    };
   }
 
-  if (!isRecord(parsed)) {
-    return { ok: false, error: "La entrada JSON debe ser un objeto." };
-  }
-
-  const currency = parsed.currency;
+  const currency = value.currency;
   if (
     typeof currency !== "string" ||
     !PURCHASE_CURRENCIES.includes(currency as PurchaseCurrency)
   ) {
     return {
       ok: false,
-      error: '"currency" debe ser "JPY" o "USD".',
+      error: `"${path("currency")}" debe ser "JPY" o "USD".`,
     };
   }
 
-  const amount = readNumber(parsed.amount, "amount");
+  const amount = readNumber(value.amount, path("amount"));
   if (!amount.ok) {
     return amount;
   }
 
-  if (!isRecord(parsed.exchangeRates)) {
+  if (!isRecord(value.exchangeRates)) {
     return {
       ok: false,
-      error: '"exchangeRates" debe ser un objeto.',
+      error: `"${path("exchangeRates")}" debe ser un objeto.`,
     };
   }
 
   const exchangeRates: ExchangeRateInput = {};
   for (const key of options.rateKeys) {
-    if (!(key in parsed.exchangeRates)) {
+    if (!(key in value.exchangeRates)) {
       return {
         ok: false,
-        error: `Falta "exchangeRates.${key}".`,
+        error: `Falta "${path(`exchangeRates.${key}`)}".`,
       };
     }
-    const rate = readNumber(parsed.exchangeRates[key], `exchangeRates.${key}`);
+    const rate = readNumber(
+      value.exchangeRates[key],
+      path(`exchangeRates.${key}`),
+    );
     if (!rate.ok) {
       return rate;
     }
     exchangeRates[key] = rate.value;
   }
 
-  if (!Array.isArray(parsed.methods)) {
+  if (!Array.isArray(value.methods)) {
     return {
       ok: false,
-      error: '"methods" debe ser un arreglo de IDs.',
+      error: `"${path("methods")}" debe ser un arreglo de IDs.`,
     };
   }
 
   const knownMethodIds = new Set(options.knownMethodIds);
   const methods: string[] = [];
-  for (const [index, methodId] of parsed.methods.entries()) {
+  for (const [index, methodId] of value.methods.entries()) {
     if (typeof methodId !== "string") {
       return {
         ok: false,
-        error: `"methods[${index}]" debe ser un texto.`,
+        error: `"${path(`methods[${index}]`)}" debe ser un texto.`,
       };
     }
     if (!knownMethodIds.has(methodId)) {
@@ -144,4 +146,23 @@ export function parseInputJson(
       methods,
     },
   };
+}
+
+export function parseInputJson(
+  raw: string,
+  options: InputJsonParseOptions,
+): InputJsonParseResult {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    const detail = error instanceof Error ? ` ${error.message}` : "";
+    return { ok: false, error: `JSON inválido.${detail}` };
+  }
+
+  if (!isRecord(parsed)) {
+    return { ok: false, error: "La entrada JSON debe ser un objeto." };
+  }
+
+  return parseInputJsonObject(parsed, options);
 }

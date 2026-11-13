@@ -53,8 +53,11 @@ describe("App (renderizado inicial)", () => {
     expect(html).toContain("Restablecer");
   });
 
-  it("ofrece alternar el fondeo entre inputs individuales y JSON", () => {
-    expect(html).toContain('aria-label="Modo de edición de fondeo"');
+  it("ofrece alternar toda la configuración entre inputs individuales y JSON", () => {
+    expect(html).toContain('aria-label="Modo de edición de configuración"');
+    expect(html).toContain("Configuración");
+    expect(html).toContain("Individual");
+    expect(html).toContain("JSON");
   });
 
   it("elige al ganador por desembolso en soles con el escenario por defecto", () => {
@@ -178,15 +181,11 @@ describe("InputPanel (compra en USD)", () => {
         paypay: 157.71524839,
       }}
       onExchangeRateChange={() => {}}
-      onApplyInputs={() => {}}
-      onApplyMethods={() => {}}
     />,
   );
 
-  it("ofrece alternar entre inputs individuales y JSON", () => {
-    expect(usdHtml).toContain("Modo de edición de entrada");
-    expect(usdHtml).toContain("Individual");
-    expect(usdHtml).toContain("JSON");
+  it("muestra los inputs individuales sin editor JSON propio", () => {
+    expect(usdHtml).not.toContain("Modo de edición de entrada");
     expect(usdHtml).not.toContain("Configuración JSON");
   });
 

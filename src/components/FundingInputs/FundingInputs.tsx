@@ -1,9 +1,7 @@
-import { useState } from "react";
 import type {
   FundingModel,
   FundingSourceView,
 } from "../../hooks/useFunding";
-import { parseFundingJson, serializeFundingJson } from "./fundingJson";
 import { formatPercent } from "../../utils/currency";
 
 interface FundingInputsProps {
@@ -96,116 +94,20 @@ function SourceRow({
   );
 }
 
-type FundingMode = "form" | "json";
-
 export function FundingInputs({ model }: FundingInputsProps) {
-  const [mode, setMode] = useState<FundingMode>("form");
-  const [jsonDraft, setJsonDraft] = useState("");
-  const [jsonError, setJsonError] = useState<string | null>(null);
-
-  function showJsonEditor() {
-    if (mode === "json") {
-      return;
-    }
-    setJsonDraft(serializeFundingJson(model.settings));
-    setJsonError(null);
-    setMode("json");
-  }
-
-  function handleJsonChange(value: string) {
-    setJsonDraft(value);
-    const parsed = parseFundingJson(value);
-    if (!parsed.ok) {
-      setJsonError(parsed.error);
-      return;
-    }
-    setJsonError(null);
-    model.applySettings(parsed.value);
-  }
-
   return (
     <section className="card funding-card" aria-labelledby="funding-inputs-title">
-      <div className="card-head card-head--split">
-        <div className="card-head-heading">
-          <h2 id="funding-inputs-title" className="card-title">
-            Fondeo
-          </h2>
-          <p className="card-subtitle">
-            {mode === "json"
-              ? "Edita los inputs de fondeo como JSON; cada cambio válido se aplica al instante."
-              : "Tasas y comisiones de las fuentes que consiguen el saldo de cada tarjeta, y conversiones de activo. Se revisan una vez al mes."}
-          </p>
-        </div>
-        <div
-          className="input-mode-toggle"
-          role="group"
-          aria-label="Modo de edición de fondeo"
-        >
-          <button
-            type="button"
-            className={`input-mode-option${
-              mode === "form" ? " is-active" : ""
-            }`}
-            aria-pressed={mode === "form"}
-            onClick={() => setMode("form")}
-          >
-            Individual
-          </button>
-          <button
-            type="button"
-            className={`input-mode-option${
-              mode === "json" ? " is-active" : ""
-            }`}
-            aria-pressed={mode === "json"}
-            onClick={showJsonEditor}
-          >
-            JSON
-          </button>
-        </div>
+      <div className="card-head">
+        <h2 id="funding-inputs-title" className="card-title">
+          Fondeo
+        </h2>
+        <p className="card-subtitle">
+          Tasas y comisiones de las fuentes que consiguen el saldo de cada
+          tarjeta, y conversiones de activo. Se revisan una vez al mes.
+        </p>
       </div>
 
-      {mode === "json" ? (
-        <div className="json-editor">
-          <div className="json-editor-head">
-            <label className="field-label" htmlFor="funding-json">
-              Configuración JSON
-            </label>
-            <span
-              id="funding-json-status"
-              className={`json-status${
-                jsonError ? " json-status--error" : ""
-              }`}
-            >
-              {jsonError ? "JSON inválido" : "Válido · aplicado"}
-            </span>
-          </div>
-          <textarea
-            id="funding-json"
-            className={`json-textarea${
-              jsonError ? " json-textarea--error" : ""
-            }`}
-            value={jsonDraft}
-            onChange={(event) => handleJsonChange(event.target.value)}
-            spellCheck={false}
-            aria-invalid={jsonError !== null}
-            aria-describedby="funding-json-help funding-json-status"
-          />
-          <p className="field-hint" id="funding-json-help">
-            Objeto con <code>sources</code> (cada fuente define{" "}
-            <code>penPerUsdt</code>, <code>fee</code> y <code>enabled</code>) y{" "}
-            <code>conversionRates</code>. Solo los inputs de configuración: la
-            red de cada ruta se elige en la tabla y no entra aquí. Los cambios
-            válidos se aplican al instante.
-          </p>
-          {jsonError ? (
-            <p className="json-error" role="alert">
-              {jsonError}
-            </p>
-          ) : null}
-        </div>
-      ) : (
-        <>
-          <h3 className="funding-subtitle">Fuentes de adquisición</h3>
+      <h3 className="funding-subtitle">Fuentes de adquisición</h3>
           <div className="funding-list">
             {model.sourceViews.map((source) => (
               <SourceRow
@@ -256,8 +158,6 @@ export function FundingInputs({ model }: FundingInputsProps) {
               </div>
             ))}
           </div>
-        </>
-      )}
     </section>
   );
 }

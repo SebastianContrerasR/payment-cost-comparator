@@ -169,28 +169,29 @@ y en la leyenda (`legend-dot--*`):
 
 ### Editor JSON de inputs
 
-- Toda tarjeta con inputs de configuración tiene el toggle
-  **Individual/JSON** (Configuración de entrada y Fondeo). Al entrar a
-  JSON serializa sus inputs y cada cambio válido se aplica al instante;
-  los errores se muestran sin tocar el estado
-  (`aria-invalid`, `role="alert"`, badge de validez).
-- El editor JSON reemplaza solo las secciones de input del card; el
-  resto del contenido (tablas de resultados, resúmenes) sigue visible
-  en modo JSON.
-- El JSON cubre exactamente los inputs visibles del card, nada más:
-  valores que no se editan en la UI no van en el JSON, y aplicar el JSON
-  preserva el resto del estado. En cards que mezclan configuración y
-  resultados (Fondeo), el JSON cubre solo las secciones de input
-  (Fuentes de adquisición y Conversiones de activo); la tabla de rutas
-  y sus selects de red no entran en el JSON.
+- La zona de configuración (Configuración de entrada + Fondeo) tiene un
+  único toggle global **Individual/JSON**. Individual edita cada input
+  en su card; JSON muestra un único editor con toda la configuración y
+  cada cambio válido se aplica al instante; los errores se muestran sin
+  tocar el estado (`aria-invalid`, `role="alert"`, badge de validez).
+- El editor JSON reemplaza solo los cards de inputs; la zona de
+  resultados (banner, tablas, resúmenes) sigue visible en modo JSON.
+- El JSON cubre exactamente los inputs visibles de la configuración,
+  nada más: `{ "purchase": {...}, "funding": {...} }` (moneda, monto,
+  tipos de cambio y métodos; tasas y comisiones por fuente, fuentes
+  activas y conversiones). Lo que no se edita en la UI (rutas y redes de
+  la tabla de fondeo) no entra, y aplicar el JSON preserva el resto del
+  estado.
 - La serialización y validación viven en un `json.ts` junto al
-  componente: `InputPanel/inputJson.ts` y `FundingInputs/fundingJson.ts`.
+  componente: `InputPanel/inputJson.ts` y `FundingInputs/fundingJson.ts`
+  definen cada sección; `ConfigJsonEditor/configJson.ts` las compone.
 - El parseo es estricto: JSON malformado, tipos inválidos, IDs o claves
-  desconocidas y claves faltantes devuelven error visible. Nunca se
-  aplica un estado parcial ni se inventan defaults silenciosos.
+  desconocidas y claves faltantes devuelven error visible con la ruta
+  seccionada (`purchase.amount`, `funding.sources.…`). Nunca se aplica
+  un estado parcial ni se inventan defaults silenciosos.
 - **Regla:** todo input nuevo se agrega junto con su serialización, su
-  validación y sus tests en el editor JSON del card correspondiente, en
-  el mismo commit.
+  validación y sus tests en la sección correspondiente del JSON de
+  configuración, en el mismo commit.
 - Las claves y campos del JSON van en inglés; los mensajes de error, en
   español.
 

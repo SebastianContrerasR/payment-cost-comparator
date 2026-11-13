@@ -3,9 +3,10 @@ import ComparisonTable, {
   type SortKey,
   type SortState,
 } from "./components/ComparisonTable/ComparisonTable";
+import ConfigJsonEditor from "./components/ConfigJsonEditor/ConfigJsonEditor";
 import FundingInputs from "./components/FundingInputs/FundingInputs";
 import FundingResults from "./components/FundingResults/FundingResults";
-import InputPanel from "./components/InputPanel/InputPanel";
+import InputPanel, { RATE_KEYS } from "./components/InputPanel/InputPanel";
 import BreakdownModal from "./components/BreakdownModal/BreakdownModal";
 import PaymentMethodPanel from "./components/PaymentMethodPanel/PaymentMethodPanel";
 import paymentMethods from "./data/paymentMethods";
@@ -30,6 +31,7 @@ export default function App() {
   } = usePurchaseInputs();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [breakdownId, setBreakdownId] = useState<string | null>(null);
+  const [configMode, setConfigMode] = useState<"form" | "json">("form");
   const [sort, setSort] = useState<SortState>({
     key: "totalUSD",
     direction: "asc",
@@ -202,23 +204,78 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        <InputPanel
-          currency={currency}
-          onCurrencyChange={setCurrency}
-          amount={amount}
-          onAmountChange={setAmount}
-          methods={paymentMethods}
-          activeMethodIds={activeMethodIds}
-          onToggleMethod={toggleMethod}
-          onSelectAllMethods={selectAllMethods}
-          onResetMethods={resetMethods}
-          exchangeRates={exchangeRates}
-          onExchangeRateChange={setExchangeRate}
-          onApplyInputs={applyPurchaseInputs}
-          onApplyMethods={setActiveMethods}
-        />
+        <div className="config-toolbar">
+          <span className="config-toolbar-label">Configuración</span>
+          <div
+            className="input-mode-toggle"
+            role="group"
+            aria-label="Modo de edición de configuración"
+          >
+            <button
+              type="button"
+              className={`input-mode-option${
+                configMode === "form" ? " is-active" : ""
+              }`}
+              aria-pressed={configMode === "form"}
+              onClick={() => setConfigMode("form")}
+            >
+              Individual
+            </button>
+            <button
+              type="button"
+              className={`input-mode-option${
+                configMode === "json" ? " is-active" : ""
+              }`}
+              aria-pressed={configMode === "json"}
+              onClick={() => setConfigMode("json")}
+            >
+              JSON
+            </button>
+          </div>
+        </div>
 
-        <FundingInputs model={funding} />
+        {configMode === "json" ? (
+          <ConfigJsonEditor
+            purchase={{
+              currency,
+              amount,
+              exchangeRates,
+              methods: [...activeMethodIds],
+            }}
+            fundingSettings={funding.settings}
+            parseOptions={{
+              rateKeys: RATE_KEYS,
+              knownMethodIds: paymentMethods.map((method) => method.id),
+            }}
+            onApply={(update) => {
+              applyPurchaseInputs({
+                currency: update.purchase.currency,
+                amount: update.purchase.amount,
+                exchangeRates: update.purchase.exchangeRates,
+              });
+              setActiveMethods(update.purchase.methods);
+              funding.applySettings(update.funding);
+            }}
+          />
+        ) : (
+          <>
+            <InputPanel
+              currency={currency}
+              onCurrencyChange={setCurrency}
+              amount={amount}
+              onAmountChange={setAmount}
+              methods={paymentMethods}
+              activeMethodIds={activeMethodIds}
+              onToggleMethod={toggleMethod}
+              onSelectAllMethods={selectAllMethods}
+              onResetMethods={resetMethods}
+              exchangeRates={exchangeRates}
+              onExchangeRateChange={setExchangeRate}
+            />
+
+            <FundingInputs model={funding} />
+          </>
+        )}
 
         {penBest ? (
           <section className="summary-banner" role="status">

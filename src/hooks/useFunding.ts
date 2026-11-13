@@ -84,7 +84,7 @@ export interface FundingModel {
   toggleRoute: (routeId: string) => void;
   setNetworkOverride: (routeId: string, networkId: string | null) => void;
   setConversionRate: (key: string, value: number | null) => void;
-  applySettings: (next: FundingSettings) => void;
+  applySettings: (update: Partial<FundingSettings>) => void;
 }
 
 function defaultSettings(): FundingSettings {
@@ -545,8 +545,8 @@ export function useFunding(results: CalculationResult[]): FundingModel {
     [update],
   );
 
-  const applySettings = useCallback((next: FundingSettings) => {
-    setSettings(next);
+  const applySettings = useCallback((update: Partial<FundingSettings>) => {
+    setSettings((previous) => ({ ...previous, ...update }));
   }, []);
 
   return {

@@ -25,28 +25,32 @@ function defaultSettings(): FundingSettings {
 }
 
 describe("funding JSON", () => {
-  it("hace round-trip de la configuración completa", () => {
+  it("hace round-trip de los inputs de fondeo sin tocar el resto del estado", () => {
     const settings = defaultSettings();
 
     expect(parseFundingJson(serializeFundingJson(settings))).toEqual({
       ok: true,
-      value: settings,
+      value: {
+        rates: settings.rates,
+        fees: settings.fees,
+        sourcesEnabled: settings.sourcesEnabled,
+        networkOverrides: {},
+        conversionRates: settings.conversionRates,
+      },
     });
   });
 
-  it("hace round-trip con tasas nulas, fuentes y rutas apagadas y red manual", () => {
+  it("hace round-trip con tasas nulas, fuentes apagadas y red manual", () => {
     const settings = defaultSettings();
-    const modified: FundingSettings = {
-      ...settings,
+    const modified = {
       rates: { ...settings.rates, "binance-p2p": null },
       fees: { ...settings.fees, "binance-p2p": 0.1 },
       sourcesEnabled: { ...settings.sourcesEnabled, "binance-p2p": false },
-      routesEnabled: { ...settings.routesEnabled, "binance-p2p-mexc": false },
       networkOverrides: { "binance-p2p-mexc": "bep20" },
       conversionRates: { ...settings.conversionRates, "okx:USDG": null },
     };
 
-    expect(parseFundingJson(serializeFundingJson(modified))).toEqual({
+    expect(parseFundingJson(serializeFundingJson({ ...settings, ...modified }))).toEqual({
       ok: true,
       value: modified,
     });
@@ -123,33 +127,34 @@ describe("funding JSON", () => {
     });
   });
 
-  it("rechaza una ruta desconocida", () => {
+  it("rechaza una ruta que no tiene selección de red", () => {
     const settings = defaultSettings();
     const raw = serializeFundingJson(settings);
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     parsed.routes = {
       ...(parsed.routes as Record<string, unknown>),
-      otra: { enabled: true, network: null },
+      "binance-p2p-binance": null,
     };
 
     expect(parseFundingJson(JSON.stringify(parsed))).toEqual({
       ok: false,
-      error: 'La ruta "otra" no existe.',
+      error: 'La ruta "binance-p2p-binance" no tiene selección de red.',
     });
   });
 
   it("rechaza una red que no existe", () => {
     const settings = defaultSettings();
     const raw = serializeFundingJson(settings);
-    const parsed = JSON.parse(raw) as {
-      routes: Record<string, Record<string, unknown>>;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    parsed.routes = {
+      ...(parsed.routes as Record<string, unknown>),
+      "binance-p2p-mexc": "red-fantasma",
     };
-    parsed.routes["binance-p2p-mexc"].network = "red-fantasma";
 
     expect(parseFundingJson(JSON.stringify(parsed))).toEqual({
       ok: false,
       error:
-        '"routes.binance-p2p-mexc.network" debe ser null (automática) o una red conocida.',
+        '"routes.binance-p2p-mexc" debe ser null (automática) o una red conocida.',
     });
   });
 

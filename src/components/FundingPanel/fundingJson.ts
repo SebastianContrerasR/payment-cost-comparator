@@ -5,7 +5,13 @@ import { defaultConversionRates } from "../../domain/funding";
 import type { FundingSettings } from "../../hooks/useFunding";
 
 const SOURCE_IDS = fundingSources.map((source) => source.id);
-const ROUTE_IDS = fundingRoutes.map((route) => route.id);
+const NETWORK_ROUTE_IDS = fundingRoutes
+  .filter((route) =>
+    route.steps.some(
+      (step) => step.kind === "transfer" && step.network !== undefined,
+    ),
+  )
+  .map((route) => route.id);
 const CONVERSION_DEFAULTS = defaultConversionRates();
 const CONVERSION_KEYS = Object.keys(CONVERSION_DEFAULTS);
 
@@ -15,8 +21,13 @@ const KNOWN_NETWORK_IDS: ReadonlySet<string> = new Set(
   ),
 );
 
+export type FundingJsonUpdate = Pick<
+  FundingSettings,
+  "rates" | "fees" | "sourcesEnabled" | "networkOverrides" | "conversionRates"
+>;
+
 export type FundingJsonParseResult =
-  | { ok: true; value: FundingSettings }
+  | { ok: true; value: FundingJsonUpdate }
   | { ok: false; error: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -93,12 +104,12 @@ export function serializeFundingJson(settings: FundingSettings): string {
     };
   }
 
-  const routes: Record<string, unknown> = {};
+  const routes: Record<string, string | null> = {};
   for (const route of fundingRoutes) {
-    routes[route.id] = {
-      enabled: settingsBoolean(settings.routesEnabled, route.id, route.enabled),
-      network: settingsOverride(settings.networkOverrides, route.id),
-    };
+    if (!NETWORK_ROUTE_IDS.includes(route.id)) {
+      continue;
+    }
+    routes[route.id] = settingsOverride(settings.networkOverrides, route.id);
   }
 
   const conversionRates: Record<string, number | null> = {};
@@ -157,46 +168,36 @@ function parseSources(
 
 function parseRoutes(
   value: unknown,
-): { ok: true; enabled: Record<string, boolean>; overrides: Record<string, string | null> } | { ok: false; error: string } {
+): { ok: true; overrides: Record<string, string | null> } | { ok: false; error: string } {
   if (!isRecord(value)) {
     return { ok: false, error: '"routes" debe ser un objeto.' };
   }
   for (const key of Object.keys(value)) {
-    if (!ROUTE_IDS.includes(key)) {
-      return { ok: false, error: `La ruta "${key}" no existe.` };
+    if (!NETWORK_ROUTE_IDS.includes(key)) {
+      return { ok: false, error: `La ruta "${key}" no tiene selección de red.` };
     }
   }
 
-  const enabled: Record<string, boolean> = {};
   const overrides: Record<string, string | null> = {};
-  for (const id of ROUTE_IDS) {
-    const entry = value[id];
-    if (entry === undefined) {
+  for (const id of NETWORK_ROUTE_IDS) {
+    const network = value[id];
+    if (network === undefined) {
       return { ok: false, error: `Falta "routes.${id}".` };
     }
-    if (!isRecord(entry)) {
-      return { ok: false, error: `"routes.${id}" debe ser un objeto.` };
-    }
-    const isEnabled = readBooleanField(`routes.${id}.enabled`, entry.enabled);
-    if (!isEnabled.ok) {
-      return isEnabled;
-    }
-    const network = entry.network;
     if (
       network !== null &&
       (typeof network !== "string" || !KNOWN_NETWORK_IDS.has(network))
     ) {
       return {
         ok: false,
-        error: `"routes.${id}.network" debe ser null (automática) o una red conocida.`,
+        error: `"routes.${id}" debe ser null (automática) o una red conocida.`,
       };
     }
-    enabled[id] = isEnabled.value;
     if (network !== null) {
       overrides[id] = network;
     }
   }
-  return { ok: true, enabled, overrides };
+  return { ok: true, overrides };
 }
 
 function parseConversionRates(
@@ -261,7 +262,6 @@ export function parseFundingJson(raw: string): FundingJsonParseResult {
       rates: sources.rates,
       fees: sources.fees,
       sourcesEnabled: sources.enabled,
-      routesEnabled: routes.enabled,
       networkOverrides: routes.overrides,
       conversionRates: conversionRates.rates,
     },

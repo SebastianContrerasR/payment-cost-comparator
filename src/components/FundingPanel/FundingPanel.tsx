@@ -410,10 +410,9 @@ export function FundingPanel({ model }: FundingPanelProps) {
           <p className="field-hint" id="funding-json-help">
             Objeto con <code>sources</code> (cada fuente define{" "}
             <code>penPerUsdt</code>, <code>fee</code> y <code>enabled</code>),{" "}
-            <code>routes</code> (cada ruta define <code>enabled</code> y{" "}
-            <code>network</code>, con null para la red automática) y{" "}
-            <code>conversionRates</code>. Los cambios válidos se aplican al
-            instante.
+            <code>routes</code> (red de cada ruta con selección de red;{" "}
+            <code>null</code> = automática) y <code>conversionRates</code>. Los
+            cambios válidos se aplican al instante.
           </p>
           {jsonError ? (
             <p className="json-error" role="alert">

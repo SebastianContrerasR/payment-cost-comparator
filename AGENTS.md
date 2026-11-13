@@ -171,9 +171,12 @@ y en la leyenda (`legend-dot--*`):
 
 - Toda tarjeta con inputs de configuración tiene el toggle
   **Individual/JSON** (Configuración de entrada y Fondeo). Al entrar a
-  JSON serializa su estado completo y cada cambio válido se aplica al
-  instante; los errores se muestran sin tocar el estado
+  JSON serializa sus inputs y cada cambio válido se aplica al instante;
+  los errores se muestran sin tocar el estado
   (`aria-invalid`, `role="alert"`, badge de validez).
+- El JSON cubre exactamente los inputs visibles del card, nada más:
+  valores que no se editan en la UI no van en el JSON, y aplicar el JSON
+  preserva el resto del estado.
 - La serialización y validación viven en un `json.ts` junto al
   componente: `InputPanel/inputJson.ts` y `FundingPanel/fundingJson.ts`.
 - El parseo es estricto: JSON malformado, tipos inválidos, IDs o claves
